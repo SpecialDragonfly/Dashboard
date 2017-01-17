@@ -201,7 +201,7 @@
 
         attachListeners() {
             super.attachListeners();
-            $("#nasa-apod").on("click", {"success": this.renderNasa}, this.callNasa);
+            $("#load-nasa").on("click", {"success": this.renderNasa}, this.callNasa);
         }
 
         renderNasa(data) {
@@ -258,13 +258,13 @@
 
         renderNasa(data) {
             var e = $("<div>").append(
-                $("<div>").attr({"id": "apod-explanation"}).css({'width': ($("#nasa-apod").width() / 2) - 5}).append(
+                $("<div>").attr({"id": "apod-explanation"}).css({'width': "25%"}).append(
                     $("<h3>").html(data.title)
                 ).append(
                     $("<div>").html(data.explanation)
                 )
             ).append(
-                $("<img>").attr({'src':data.hdurl, 'width': $("#nasa-apod").width() / 2})
+                $("<img>").attr({'src':data.hdurl, 'width': "74%"})
             );
             $("#nasa-apod").append(e);
         }
