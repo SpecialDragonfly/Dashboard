@@ -1,0 +1,154 @@
+body {
+    padding:0px;
+    margin:0px;
+    font-family:monospace;
+}
+          
+body.desktop header {
+    background: rgb(231, 76, 60);
+    height:30px;
+    font-size:20px;
+    box-shadow:0px 0px 3px 0px;
+    padding-top:5px;
+}
+
+body.mobile header {
+    background: rgb(39, 174, 96);
+}
+
+.container {
+    padding:5px;
+}
+ 
+aside {
+    margin-bottom:10px;
+}
+#time-remaining {
+    display:inline-block;
+    min-width:50%;
+    box-sizing:border-box;
+    padding-left:5px;
+}
+
+#time-remaining:before {
+    content:"Time remaining (until last day):";
+    margin-right:5px;
+}
+
+#time-so-far {
+    display:inline-block;
+    text-align:right;
+    min-width:50%;
+    box-sizing:border-box;
+    padding-right:5px;
+}
+
+#time-so-far:before {
+    content:"Time so far:";
+    margin-right:5px;
+}
+
+ul.category li {
+    border:1px solid red;
+    display:inline-block;
+    width:200px;
+    height:50px;
+    border-radius:25px;
+    text-align:center;
+    margin:10px;
+}
+
+ul.category li a {
+    padding-top:15px;
+    display: block;
+}
+
+h3 {
+    clear:both;
+}
+
+ul {
+    clear:both;
+}
+
+.widget {
+    max-width:18%;
+    min-width:18%;
+    box-sizing: border-box;
+    border:1px solid black;
+    margin:5px;
+    float:left;
+}
+
+.widget.double-width {
+    max-width:40%;
+}
+
+.widget .heading {
+    box-shadow: 0px 0px 3px 0px black;
+    padding:5px;
+    margin-bottom:1px;
+    height:20px;
+    background-color: rgb(231, 76, 60);
+    color: white;
+    font-weight:bold;
+    font-size:16px;
+}
+
+.widget .content {
+    padding:10px;
+    background-color: FloralWhite;
+    height:200px;
+}
+
+.widget .content.scrolling {
+    max-height:200px;
+    overflow-y: scroll;
+}
+
+#trading-knowledge {
+    border:1px solid black;
+    height:60px;
+    overflow:hidden;
+    padding-left:10px;
+}
+
+#apod-explanation {
+    float:right;
+}
+
+#way-of-paul ul {
+    -webkit-padding-start: 0px;
+    width:45%;
+    margin:45px auto 0px auto;
+}
+
+#way-of-paul .content div {
+    width:100%;
+    display:inline-block;
+    text-align:center;
+    margin-top:10px;
+}
+
+.nasa-error {
+    border:2px solid red;
+    padding:5px;
+    margin:5px;
+}
+
+/* Portrait */
+@media screen and (device-width: 360px) and (device-height: 640px) and (orientation: portrait) {
+    #time-remaining:before {
+        display:block;
+    }
+
+    #time-so-far:before {
+        display:block;
+    }
+
+    aside {
+        width:100%;
+        max-width:360px;
+        display:block;
+    }
+}
