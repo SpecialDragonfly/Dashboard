@@ -14,7 +14,7 @@ $head = (new Head(
         "http://thecodelesscode.com/contents"
     ]
 ))->toString();
-$body = (new Body(new TradingPoints(), new EconomicPoints()))->toString();
+$body = (new Body(new TradingPoints(), new EconomicPoints(), new ServerDebugging()))->toString();
 
 $html = new Html();
 $html->out($head.$body);
