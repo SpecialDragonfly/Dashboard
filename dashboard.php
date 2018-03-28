@@ -93,13 +93,38 @@ class EconomicPoints {
     }
 };
 
+class ServerDebugging {
+	private $checkPoints = [
+		"uptime # uptime and CPU stress",
+		"w # or better yet:last |head # who is/has been in",
+		"netstat -tlpn # find server role",
+		"df -h # out of disk space?",
+		"df -hi #checking for inode availability",
+		"grep kill /var/log/messages # out of memory?",
+		"ps auxf # what's running",
+		"htop # stressed? , look out for D (waiting on I/O typically) processes",
+		"history # what has changed recently",
+		"tail /var/log/application.log # anything interesting logged?"
+	];
+	public function toHtml() {
+	    $html = "<p>My goto for initially troubleshooting a server is:</p>";
+	    $html .= "<ol>";
+	    foreach ($this->checkPoints as $point) {
+	        $html .= "<li>".$point."</li>";
+	    }
+	    $html .= "</ol>";
+	}
+}
+
 class Body {
   private $trading;
   private $economic;
+  private $serverDebugging;
 
-  public function __construct(TradingPoints $trading, EconomicPoints $economic) {
+  public function __construct(TradingPoints $trading, EconomicPoints $economic, ServerDebugging $serverDebugging) {
   	$this->trading = $trading;
   	$this->economic = $economic;
+	$this->serverDebugging = $serverDebugging;
   }
 
   public function toString() {
@@ -132,6 +157,7 @@ class Body {
     $html .= '<div class="content scrolling">';
     $html .= $this->trading->toHtml();
     $html .= $this->economic->toHtml();
+    $html .= $this->serverDebugging->toHtml();
     $html .= '</div>';
     $html .= '</div>';
     $html .= "</div>";
