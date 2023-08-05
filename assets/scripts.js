@@ -2,32 +2,32 @@
 (function($) {
     class Time {
         static since(time) {
-            var now = Date.now();
-            var seconds = parseInt((now - time) / 1000);
+            let now = Date.now();
+            let seconds = parseInt((now - time) / 1000);
 
-            var days = parseInt(seconds / 86400);
+            let days = parseInt(seconds / 86400);
             seconds = seconds % 86400;
 
-            var hours = parseInt(seconds / 3600);
+            let hours = parseInt(seconds / 3600);
             seconds = seconds % 3600;
 
-            var minutes = parseInt(seconds / 60);
+            let minutes = parseInt(seconds / 60);
             seconds = parseInt(seconds % 60);
 
             return {'days': days, 'hours' : hours, 'minutes' : minutes, 'seconds' : seconds};
         }
 
         static until(time) {
-            var now = Date.now();
-            var seconds = parseInt((time - now) / 1000);
+            let now = Date.now();
+            let seconds = parseInt((time - now) / 1000);
 
-            var days = parseInt(seconds / 86400);
+            let days = parseInt(seconds / 86400);
             seconds = seconds % 86400;
 
-            var hours = parseInt(seconds / 3600);
+            let hours = parseInt(seconds / 3600);
             seconds = seconds % 3600;
 
-            var minutes = parseInt(seconds / 60);
+            let minutes = parseInt(seconds / 60);
             seconds = parseInt(seconds % 60);
 
             return {'days': days, 'hours' : hours, 'minutes' : minutes, 'seconds' : seconds};
@@ -50,7 +50,6 @@
                     {name:'QC', src:'http://www.questionablecontent.net/'},
                     {name:'XKCD', src:'http://xkcd.com/', mobile:'http://m.xkcd.com'},
                     {name:'Girls With Slingshots', src:'http://www.girlswithslingshots.com/'},
-                    {name:'Dilbert', src:'http://dilbert.com/'},
                     {name:'365 tomorrows', src:'http://365tomorrows.com/'},
                     {name:'The Codeless Code', src:'http://thecodelesscode.com/contents'}
                 ]
@@ -61,25 +60,25 @@
         }
 
         startTimers() {
-            var timeSoFar = $("#time-so-far"); 
-            var before = new Date(2014, 10, 24, 10, 0, 0);
-            var soFar = Time.since(before);
+            let timeSoFar = $("#time-so-far");
+            let before = new Date(2022, 3, 25, 10, 0, 0);
+            let soFar = Time.since(before);
             timeSoFar.html(soFar.days + " days " + soFar.hours + " hours " + soFar.minutes + " minutes " + soFar.seconds + " seconds");
 
-           setInterval(function() {
-               var soFar = Time.since(before);
-               timeSoFar.html(soFar.days + " days " + soFar.hours + " hours " + soFar.minutes + " minutes " + soFar.seconds + " seconds");
-           }, 30000);
+            setInterval(function() {
+                let soFar = Time.since(before);
+                timeSoFar.html(soFar.days + " days " + soFar.hours + " hours " + soFar.minutes + " minutes " + soFar.seconds + " seconds");
+            }, 30000);
 
-           var timeUntilElement = $('#time-remaining');
-           var until = new Date(2018, 3, 21, 1, 0, 0);
-           var untilTime = Time.until(until);
-           timeUntilElement.html(untilTime.days + " days " + untilTime.hours + " hours " + untilTime.minutes + " minutes " + untilTime.seconds + " seconds");
-           setInterval(function() {
-               var untilTime = Time.until(until);
-               timeUntilElement.html(untilTime.days + " days " + untilTime.hours + " hours " + untilTime.minutes + " minutes " + untilTime.seconds + " seconds");
-           }, 30000);
-        } 
+            let timeUntilElement = $('#time-remaining');
+            let until = new Date(2023, 11, 24, 1, 0, 0);
+            let untilTime = Time.until(until);
+            timeUntilElement.html(untilTime.days + " days " + untilTime.hours + " hours " + untilTime.minutes + " minutes " + untilTime.seconds + " seconds");
+            setInterval(function() {
+                let untilTime = Time.until(until);
+                timeUntilElement.html(untilTime.days + " days " + untilTime.hours + " hours " + untilTime.minutes + " minutes " + untilTime.seconds + " seconds");
+            }, 30000);
+        }
 
         callNasa(event) {
             $.get(
@@ -98,12 +97,12 @@
                 }
             )
         }
-      
+
         render() {
 
         }
     }
-     
+
     class MobileStrategy extends Strategy {
         constructor() {
             super();
@@ -119,7 +118,7 @@
         }
 
         renderNasa(data) {
-            var e = $("<div>").append(
+            let e = $("<div>").append(
                 $("<img>").attr({'src':data.url, 'width': $("#nasa-apod").width()})
             ).append(
                 $("<div>").attr({"id": "apod-mobile-explanation"}).append(
@@ -136,15 +135,15 @@
             $("body").addClass('mobile');
             $("#display-type").html("Displaying as a mobile");
             $("#nasa-apod").append($("<button>").attr("id", "load-nasa").html("Load Nasa"));
-            var ul = $(".main");
+            let ul = $(".main");
             $.each(this.urls, function(category, sites) {
                 $(document.body).append($("<h3>").html(category));
                 $(document.body).append(
                     $("<ul>").attr('data-category', category).addClass(category).addClass("category")
                 );
-                var ul = $("ul[data-category='" + category + "']");
+                let ul = $("ul[data-category='" + category + "']");
                 $.each(sites, function(index, site) {
-                    var src = site.mobile === undefined ? site.src : site.mobile;
+                    let src = site.mobile === undefined ? site.src : site.mobile;
                     ul.append(
                         $("<li>").append(
                             $("<a>").html(site.name).attr('href', src)
@@ -186,8 +185,8 @@
             $("#nasa-apod .content button").remove();
         }
 
-        render() { 
-            $("body").addClass('desktop'); 
+        render() {
+            $("body").addClass('desktop');
             $("#display-type").html("Displaying as a desktop");
             $("#trading-knowledge-title").on('click', function() {
                 if ($("#trading-knowledge").height() > 60) {
@@ -198,28 +197,28 @@
             });
             $("#nasa-apod .content").append($("<button>").attr("id", "load-nasa").html("Load Nasa"));
             super.render();
-            var container = $(".container");
-            var ul = $(".main");
+            let container = $(".container");
+            let ul = $(".main");
             $.each(this.urls, function(category, sites) {
                 $(container).append($("<h3>").html(category));
                 $(container).append(
                     $("<ul>").attr('data-category', category).addClass(category).addClass("category")
                 );
-                var ul = $("ul[data-category='" + category + "']");
+                let ul = $("ul[data-category='" + category + "']");
                 $.each(sites, function(index, site) {
                     ul.append(
                         $("<li>").append(
                             $("<a>").html(site.name).attr('href', site.src).attr('target', '_blank')
-                        ) 
+                        )
                     )
                 });
             });
-        } 
+        }
     }
- 
+
     class StrategyFactory {
         static create() {
-            var strategy = new DesktopStrategy();
+            let strategy = new DesktopStrategy();
             if (this.mobile()) {
                 strategy = new MobileStrategy();
             }
@@ -232,12 +231,12 @@
                 /(iPhone|iPod|iPad|Android|BlackBerry)/
             );
         }
-    }  
+    }
 
     // document.ready shorthand
     $(function() {
         function init() {
-            var strategy = StrategyFactory.create();
+            let strategy = StrategyFactory.create();
             strategy.render();
             strategy.startTimers();
             strategy.attachListeners();
@@ -247,4 +246,3 @@
         init();
     });
 })(jQuery);
-

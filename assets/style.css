@@ -3,7 +3,7 @@ body {
     margin:0px;
     font-family:monospace;
 }
-          
+
 body.desktop header {
     background: rgb(231, 76, 60);
     height:30px;
@@ -19,26 +19,26 @@ body.mobile header {
 .container {
     padding:5px;
 }
- 
+
 aside {
     margin-bottom:10px;
 }
 #time-remaining {
     display:inline-block;
-    min-width:50%;
+    min-width:49%;
     box-sizing:border-box;
     padding-left:5px;
 }
 
 #time-remaining:before {
-    content:"Time remaining (until last day):";
+    content:"Time remaining (until xmas):";
     margin-right:5px;
 }
 
 #time-so-far {
     display:inline-block;
     text-align:right;
-    min-width:50%;
+    min-width:49%;
     box-sizing:border-box;
     padding-right:5px;
 }

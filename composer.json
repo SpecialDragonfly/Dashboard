@@ -1,0 +1,14 @@
+{
+    "name": "dominic/dashboard",
+    "autoload": {
+        "psr-4": {
+            "Dashboard\\": "src"
+        }
+    },
+    "authors": [
+        {
+            "name": "Dominic Orme",
+            "email": "Dominic.Orme@googlemail.com"
+        }
+    ]
+}
