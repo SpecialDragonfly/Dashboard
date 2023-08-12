@@ -12,12 +12,13 @@ $head = (new Head(
     ["assets/style.css"],
     ["https://code.jquery.com/jquery-latest.min.js", "assets/scripts.js"],
     [
-        "http://www.cad-comic.com/", 
-        "http://www.questionablecontent.net/", 
-        "http://xkcd.com/", 
-        "http://www.girlswithslingshots.com/",
-        "http://365tomorrows.com/", 
-        "http://thecodelesscode.com/contents"
+        "https://www.cad-comic.com/", 
+        "https://www.questionablecontent.net/", 
+        "https://xkcd.com/", 
+        "https://www.girlswithslingshots.com/",
+        "https://365tomorrows.com/", 
+	"https://thecodelesscode.com/contents",
+	"https://www.dailycodingproblem.com/"
     ]
 ))->toString();
 $body = (new Body(new TradingPoints(), new EconomicPoints(), new ServerDebugging()))->toString();

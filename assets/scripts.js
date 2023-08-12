@@ -46,12 +46,13 @@
                     {name:'John Haynes', src:'https://joehaynes98.wordpress.com/'}
                 ],
                 'comic':[
-                    {name:'Ctrl-Alt-Del', src:'http://www.cad-comic.com/'},
-                    {name:'QC', src:'http://www.questionablecontent.net/'},
-                    {name:'XKCD', src:'http://xkcd.com/', mobile:'http://m.xkcd.com'},
-                    {name:'Girls With Slingshots', src:'http://www.girlswithslingshots.com/'},
-                    {name:'365 tomorrows', src:'http://365tomorrows.com/'},
-                    {name:'The Codeless Code', src:'http://thecodelesscode.com/contents'}
+                    {name:'Ctrl-Alt-Del', src:'https://www.cad-comic.com/'},
+                    {name:'QC', src:'https://www.questionablecontent.net/'},
+                    {name:'XKCD', src:'https://xkcd.com/', mobile:'http://m.xkcd.com'},
+                    {name:'Girls With Slingshots', src:'https://www.girlswithslingshots.com/'},
+                    {name:'365 tomorrows', src:'https://365tomorrows.com/'},
+                    {name:'The Codeless Code', src:'https://thecodelesscode.com/contents'},
+                    {name:'Daily Coding Problem', src:'https://www.dailycodingproblem.com'}
                 ]
             };
         }
