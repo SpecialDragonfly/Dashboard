@@ -1,16 +1,17 @@
 <?php
 namespace Dashboard;
 
+use Dashboard\Areas\AreaInterface;
+
 class Body
 {
-    private $trading;
-    private $economic;
-    private $serverDebugging;
+    /**
+     * @var AreaInterface[]
+     */
+    private $areas;
 
-    public function __construct(TradingPoints $trading, EconomicPoints $economic, ServerDebugging $serverDebugging) {
-        $this->trading = $trading;
-        $this->economic = $economic;
-        $this->serverDebugging = $serverDebugging;
+    public function __construct(AreaInterface ...$areas) {
+        $this->areas = $areas;
     }
 
     public function toString() {
@@ -38,19 +39,14 @@ class Body
         $html .= '<div> - The Way of Paul </div>';
         $html .= '</div>';
         $html .= '</div>';
-        $html .= '<div class="widget double-width" id="trading-knowlegde">';
-        $html .= '<div class="heading">Trading Knowledge</div><!-- https://thinkery.me/nader/53172b621cb6025b0a0127c7 -->';
-        $html .= '<div class="content scrolling">';
-        $html .= $this->trading->toHtml();
-        $html .= $this->economic->toHtml();
-        $html .= '</div>';
-        $html .= '</div>';
-        $html .= '<div class="widget" id="server-debugging">';
-        $html .= '<div class="heading">Server Debugging</div>';
-        $html .= '<div class="content scrolling">';
-        $html .= $this->serverDebugging->toHtml();
-        $html .= "</div>";
-        $html .= "</div>";
+        foreach ($this->areas as $area) {
+            $html .= '<div class="widget double-width" id="'.$area->htmlId().'">';
+            $html .= '<div class="heading">'.$area->areaTitle().'</div><!-- https://thinkery.me/nader/53172b621cb6025b0a0127c7 -->';
+            $html .= '<div class="content scrolling">';
+            $html .= $area->toHtml();
+            $html .= '</div>';
+            $html .= '</div>';
+        }
         $html .= "</div>";
         $html .= "</body>";
 

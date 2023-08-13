@@ -1,7 +1,7 @@
 <?php
-namespace Dashboard;
+namespace Dashboard\Areas;
 
-class TradingPoints
+class TradingPoints implements AreaInterface
 {
     private $tradingPoints = [
         "Volume is the cause for price",
@@ -23,7 +23,7 @@ class TradingPoints
         "Use a stock scanner the day before trading to find potential candidates for trading"
     ];
 
-    public function toHtml() {
+    public function toHtml() : string {
         $html = "<p>Accumulated knowledge from blogs, people, magazines, etc. over the last year.</p>";
         $html .= "<h4>Most importantly</h4>";
         $html .= "<ol>";
@@ -33,5 +33,15 @@ class TradingPoints
         $html .= "</ol>";
 
         return $html;
+    }
+
+    public function htmlId(): string
+    {
+        return 'trading-knowledge';
+    }
+
+    public function areaTitle(): string
+    {
+        return 'Trading Knowledge';
     }
 }

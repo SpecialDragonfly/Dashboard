@@ -1,12 +1,13 @@
 <?php
 require_once __DIR__.'/vendor/autoload.php';
 
+use Dashboard\Areas\BlogRoll;
+use Dashboard\Areas\EconomicPoints;
+use Dashboard\Areas\ServerDebugging;
+use Dashboard\Areas\TradingPoints;
 use Dashboard\Body;
-use Dashboard\EconomicPoints;
 use Dashboard\Head;
 use Dashboard\Html;
-use Dashboard\ServerDebugging;
-use Dashboard\TradingPoints;
 
 $head = (new Head(
     ["assets/style.css"],
@@ -17,11 +18,21 @@ $head = (new Head(
         "https://xkcd.com/", 
         "https://www.girlswithslingshots.com/",
         "https://365tomorrows.com/", 
-	"https://thecodelesscode.com/contents",
-	"https://www.dailycodingproblem.com/"
+	    "https://thecodelesscode.com/contents",
+	    "https://www.dailycodingproblem.com/"
     ]
 ))->toString();
-$body = (new Body(new TradingPoints(), new EconomicPoints(), new ServerDebugging()))->toString();
+$blogRoll = new BlogRoll(
+    [
+        'Constanze' => 'http://constanzethegreatandhersexyleukaemia.blogspot.co.uk/',
+        'Dan Summers' => 'http://www.glasshalfempty.co.uk/',
+        'Nik Barham' => 'http://www.brokencube.co.uk/',
+        'CraigK' => 'http://www.craigk.org/',
+        'Will Tomlinson' => 'http://chronos.diskstation.me/',
+        'John Haynes' => 'https://joehaynes98.wordpress.com/'
+    ]
+);
+$body = (new Body(new TradingPoints(), new EconomicPoints(), new ServerDebugging(), $blogRoll))->toString();
 
 $html = new Html();
 $html->out($head.$body);

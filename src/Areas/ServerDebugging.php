@@ -1,7 +1,7 @@
 <?php
-namespace Dashboard;
+namespace Dashboard\Areas;
 
-class ServerDebugging
+class ServerDebugging implements AreaInterface
 {
     private $checkPoints = [
         "uptime # uptime and CPU stress",
@@ -16,7 +16,7 @@ class ServerDebugging
         "tail /var/log/application.log # anything interesting logged?"
     ];
 
-    public function toHtml() {
+    public function toHtml() : string {
         $html = "<p>My goto for initially troubleshooting a server is:</p>";
         $html .= "<ol>";
         foreach ($this->checkPoints as $point) {
@@ -25,5 +25,15 @@ class ServerDebugging
         $html .= "</ol>";
 
         return $html;
+    }
+
+    public function htmlId(): string
+    {
+        return 'server-debugging';
+    }
+
+    public function areaTitle(): string
+    {
+        return 'Server Debugging';
     }
 }

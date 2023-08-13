@@ -1,7 +1,7 @@
 <?php
-namespace Dashboard;
+namespace Dashboard\Areas;
 
-class EconomicPoints
+class EconomicPoints implements AreaInterface
 {
     private $economicPoints = [
         "Interest rate (price of money): if interest rates are low it's good for the stock market.",
@@ -14,7 +14,7 @@ class EconomicPoints
         "It's long been said that manufacturing is the first sector to wobble, then the transmission into services is seen a quarter or so later. Lower inflation and slowing manufacturing hits the industrial services side of the economy first and this is eventually felt in retail facing areas."
     ];
 
-    public function toHtml() {
+    public function toHtml() : string {
         $html = "<h4>Key Economic Indicators</h4>";
 
         $html .= "<ol>";
@@ -24,5 +24,15 @@ class EconomicPoints
         $html .= "</ol>";
 
         return $html;
+    }
+
+    public function htmlId(): string
+    {
+        return 'economic-knowledge';
+    }
+
+    public function areaTitle(): string
+    {
+        return 'Economic Points';
     }
 }

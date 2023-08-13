@@ -37,14 +37,6 @@
     class Strategy {
         constructor() {
             this.urls = {
-                'blog':[
-                    {name:'Constanze', src:'http://constanzethegreatandhersexyleukaemia.blogspot.co.uk/'},
-                    {name:'Dan Summers', src:'http://www.glasshalfempty.co.uk/'},
-                    {name:'Nik Barham', src:'http://www.brokencube.co.uk/'},
-                    {name:'CraigK', src:'http://www.craigk.org/'},
-                    {name:'Will Tomlinson', src:'http://chronos.diskstation.me/'},
-                    {name:'John Haynes', src:'https://joehaynes98.wordpress.com/'}
-                ],
                 'comic':[
                     {name:'Ctrl-Alt-Del', src:'https://www.cad-comic.com/'},
                     {name:'QC', src:'https://www.questionablecontent.net/'},
