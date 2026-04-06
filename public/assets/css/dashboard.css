@@ -1,0 +1,106 @@
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.25rem;
+}
+
+.widget {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    backdrop-filter: blur(8px);
+}
+
+.widget-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.widget-title svg { width: 14px; height: 14px; }
+
+.widget-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.widget-list li {
+    font-size: 0.85rem;
+    color: var(--text);
+    line-height: 1.5;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.widget-list li:last-child { border-bottom: none; padding-bottom: 0; }
+
+.widget-scroll {
+    max-height: 280px;
+    overflow-y: auto;
+    margin-top: 0.5rem;
+}
+
+.widget-list--mono li,
+.widget-list--mono code {
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.8rem;
+}
+
+code {
+    background: rgba(102, 126, 234, 0.15);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+    color: #a0b4f0;
+}
+
+.widget-list--links a {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text);
+    font-weight: 500;
+}
+
+.widget-list--links a:hover { color: var(--accent); text-decoration: none; }
+.widget-list--links svg { width: 13px; height: 13px; color: var(--text-muted); }
+
+/* APOD widget */
+.widget--apod {
+    grid-column: span 2;
+}
+
+.apod-content img {
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 0.75rem;
+}
+
+.apod-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0.75rem 0 0.4rem;
+}
+
+.apod-explanation {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .widget--apod { grid-column: span 1; }
+    .dashboard-grid { grid-template-columns: 1fr; }
+}

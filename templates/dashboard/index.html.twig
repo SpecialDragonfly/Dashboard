@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard — NotQuiteHuman{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="/assets/css/dashboard.css">
+{% endblock %}
+
+{% block body %}
+<div class="dashboard-grid">
+    {% include 'dashboard/_widgets/trading.html.twig' %}
+    {% include 'dashboard/_widgets/economic.html.twig' %}
+    {% include 'dashboard/_widgets/server_debugging.html.twig' %}
+    {% include 'dashboard/_widgets/way_of_paul.html.twig' %}
+    {% include 'dashboard/_widgets/comics.html.twig' %}
+    {% if user is defined %}
+        {% include 'dashboard/_widgets/admin_links.html.twig' %}
+    {% endif %}
+    {% include 'dashboard/_widgets/blog.html.twig' %}
+    <div class="widget widget--apod" id="apodWidget">
+        <h3 class="widget-title">Astronomy Picture of the Day</h3>
+        <div class="apod-content" id="apodContent">
+            <p class="loading">Loading…</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="/assets/js/dashboard.js"></script>
+{% endblock %}

@@ -1,0 +1,218 @@
+.blog-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.blog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+
+.blog-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+}
+
+/* Post listing */
+.post-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.post-card {
+    padding: 1.25rem 1.5rem;
+    background: var(--glass-bg);
+    transition: background 0.15s;
+}
+
+.post-card:hover { background: rgba(255, 255, 255, 0.06); }
+
+.post-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+}
+
+.post-card-meta time {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.post-card h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.post-card h2 a { color: var(--text); }
+.post-card h2 a:hover { color: var(--accent); text-decoration: none; }
+
+.post-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+/* Tags */
+.post-tags {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+}
+
+.tag {
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 0.1rem 0.5rem;
+    border-radius: 20px;
+    background: rgba(102, 126, 234, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+/* Single post */
+.post-full { padding: 0.5rem 0; }
+
+.post-header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.post-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.back-link:hover { color: var(--text); text-decoration: none; }
+.back-link svg { width: 14px; height: 14px; }
+
+.post-meta time { font-size: 0.85rem; color: var(--text-muted); }
+
+.post-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.25;
+    margin-bottom: 0.75rem;
+}
+
+.post-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+
+/* Prose (rendered markdown) */
+.prose {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--text);
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 2rem 0 0.75rem;
+    color: #fff;
+}
+
+.prose h1 { font-size: 1.6rem; }
+.prose h2 { font-size: 1.3rem; }
+.prose h3 { font-size: 1.1rem; }
+
+.prose p { margin: 0 0 1.25rem; }
+.prose ul, .prose ol { margin: 0 0 1.25rem 1.5rem; }
+.prose li { margin-bottom: 0.4rem; }
+
+.prose a { color: var(--accent); }
+
+.prose code {
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.875em;
+    background: rgba(102, 126, 234, 0.12);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+    color: #a0b4f0;
+}
+
+.prose pre {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    overflow-x: auto;
+    margin: 0 0 1.25rem;
+}
+
+.prose pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.85rem;
+    color: #c8d3f5;
+}
+
+.prose blockquote {
+    border-left: 3px solid var(--accent);
+    padding-left: 1rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin: 0 0 1.25rem;
+}
+
+.prose hr {
+    border: none;
+    border-top: 1px solid var(--glass-border);
+    margin: 2rem 0;
+}
+
+.post-footer { margin-top: 2rem; color: var(--text-muted); font-size: 0.85rem; }
+
+/* Post form */
+.post-form {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+}
+
+.toolbar {
+    display: flex;
+    gap: 0.35rem;
+    margin-bottom: 0.5rem;
+}
+
+.toolbar button {
+    padding: 0.25rem 0.6rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-family: var(--font);
+}
+
+.toolbar button:hover { background: rgba(255,255,255,0.08); }
+
+textarea#content {
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.875rem;
+    resize: vertical;
+}
+
+.form-actions { margin-top: 1.5rem; }

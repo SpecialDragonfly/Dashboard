@@ -9,7 +9,8 @@
 
 | Layer | Choice | Notes |
 |---|---|---|
-| Backend | **Symfony** (latest stable, currently 7.x) | No annotations — YAML routing, explicit service wiring |
+| Backend | **Slim 4** | Micro-framework. PSR-7/PSR-15. PHP config only — no YAML, no annotations |
+| DI Container | **PHP-DI 7** | Explicit PHP definitions — no autowiring |
 | Templating | **Twig** | Replaces PHP string concatenation |
 | Database | **MySQL** (existing `notquitehuman` DB) | Plain **PDO** — hand-written domain objects, no ORM, no DBAL, no hydration magic |
 | Migrations | **Plain SQL files** | Versioned `.sql` files in `migrations/`, applied via a simple PHP runner script |
@@ -22,9 +23,9 @@
 
 No Doctrine (ORM or DBAL), no reflection-based hydration, no query builders. Just PDO with prepared statements, and hand-written domain objects with explicit constructors. Repositories do `$stmt->fetch(PDO::FETCH_ASSOC)` and build domain objects manually. SQL stays visible, data flow stays obvious.
 
-### No annotations — how routing works
+### No annotations — how routing and DI work
 
-All routes defined in `config/routes.yaml`. All service wiring in `config/services.yaml`. Controllers are plain PHP classes registered as services — no auto-wiring magic, no `#[Route]` attributes, no `@Route` annotations.
+Routes are defined in `config/routes.php` as a closure over `Slim\App`. Service wiring is in `config/container.php` as a plain PHP array of closures — no autowiring, no reflection, no magic. Middleware is registered in `config/middleware.php`.
 
 ---
 
@@ -33,16 +34,11 @@ All routes defined in `config/routes.yaml`. All service wiring in `config/servic
 ```
 notquitehuman.new/
 ├── config/
-│   ├── routes.yaml              # All route definitions
-│   ├── services.yaml            # All service wiring (explicit)
-│   ├── packages/                # Symfony bundle config
-│   │   ├── framework.yaml
-│   │   ├── twig.yaml
-│   │   └── security.yaml        # Auth config
-│   └── routes/
-│       └── framework.yaml       # Symfony internal routes
+│   ├── container.php            # PHP-DI service definitions (explicit, no autowiring)
+│   ├── routes.php               # Slim route registrations + middleware attachment
+│   └── middleware.php           # App-wide middleware stack
 ├── public/
-│   ├── index.php                # Symfony front controller
+│   ├── index.php                # Slim bootstrap
 │   └── assets/
 │       ├── css/
 │       │   ├── common.css       # Base styles + layout
@@ -89,8 +85,8 @@ notquitehuman.new/
 │   │   ├── PortfolioItem.php
 │   │   ├── StockQuote.php
 │   │   └── DividendPayment.php
-│   └── Security/
-│       └── TokenAuthenticator.php  # Custom authenticator for Bearer tokens
+│   └── Middleware/
+│       └── TokenAuthMiddleware.php  # PSR-15 middleware — validates Bearer token
 ├── templates/
 │   ├── base.html.twig           # Master layout (head, header, footer)
 │   ├── dashboard/
@@ -126,262 +122,146 @@ notquitehuman.new/
 
 ---
 
-## 3. Routing (config/routes.yaml)
+## 3. Routing (config/routes.php)
 
-```yaml
-# -- Public --
-app_home:
-  path: /
-  controller: App\Controller\DashboardController::index
-  methods: [GET]
+Auth-protected routes have `->add(TokenAuthMiddleware::class)` chained directly. Public routes have no middleware.
 
-app_login:
-  path: /login
-  controller: App\Controller\AuthController::loginPage
-  methods: [GET]
+```php
+return function (App $app) {
+    // -- Public --
+    $app->get('/',       [DashboardController::class, 'index']);
+    $app->get('/login',  [AuthController::class, 'loginPage']);
+    $app->post('/login', [AuthController::class, 'login']);
+    $app->post('/logout',[AuthController::class, 'logout']);
 
-app_login_submit:
-  path: /login
-  controller: App\Controller\AuthController::login
-  methods: [POST]
+    // -- Blog (public read) --
+    $app->get('/blog',        [BlogController::class, 'index']);
+    $app->get('/blog/{slug}', [BlogController::class, 'show']);
 
-app_logout:
-  path: /logout
-  controller: App\Controller\AuthController::logout
-  methods: [POST]
+    // -- Dashboard (auth required) --
+    $app->get('/dashboard', [DashboardController::class, 'dashboard'])
+        ->add(TokenAuthMiddleware::class);
 
-# -- Dashboard (auth required) --
-app_dashboard:
-  path: /dashboard
-  controller: App\Controller\DashboardController::dashboard
-  methods: [GET]
+    // -- Blog write (auth required) --
+    $app->get('/blog/new',          [BlogController::class, 'create'])->add(TokenAuthMiddleware::class);
+    $app->post('/blog/new',         [BlogController::class, 'create'])->add(TokenAuthMiddleware::class);
+    $app->get('/blog/{slug}/edit',  [BlogController::class, 'edit'])->add(TokenAuthMiddleware::class);
+    $app->post('/blog/{slug}/edit', [BlogController::class, 'edit'])->add(TokenAuthMiddleware::class);
+    $app->delete('/blog/{slug}',    [BlogController::class, 'delete'])->add(TokenAuthMiddleware::class);
 
-# -- Blog (public read, auth write) --
-app_blog:
-  path: /blog
-  controller: App\Controller\BlogController::index
-  methods: [GET]
+    // -- Ripper (auth required) --
+    $app->get('/ripper',                        [RipperController::class, 'index'])->add(TokenAuthMiddleware::class);
+    $app->post('/rip',                          [RipperController::class, 'rip'])->add(TokenAuthMiddleware::class);
+    $app->get('/history',                       [RipperController::class, 'history'])->add(TokenAuthMiddleware::class);
+    $app->get('/ripper/download/{videoId}',     [RipperController::class, 'download'])->add(TokenAuthMiddleware::class);
 
-app_blog_post:
-  path: /blog/{slug}
-  controller: App\Controller\BlogController::show
-  methods: [GET]
+    // -- Dividends (auth required) --
+    $app->get('/dividends',          [DividendController::class, 'index'])->add(TokenAuthMiddleware::class);
+    $app->get('/portfolio',          [DividendController::class, 'getPortfolio'])->add(TokenAuthMiddleware::class);
+    $app->post('/add-symbol',        [DividendController::class, 'addSymbol'])->add(TokenAuthMiddleware::class);
+    $app->get('/upcoming-dividends', [DividendController::class, 'getUpcomingDividends'])->add(TokenAuthMiddleware::class);
+    $app->put('/update-stock',       [DividendController::class, 'updateStock'])->add(TokenAuthMiddleware::class);
+    $app->delete('/delete-stock',    [DividendController::class, 'deleteStock'])->add(TokenAuthMiddleware::class);
+    $app->get('/latest-prices',      [DividendController::class, 'getPrices'])->add(TokenAuthMiddleware::class);
+    $app->post('/add-dividend',      [DividendController::class, 'addDividend'])->add(TokenAuthMiddleware::class);
 
-app_blog_create:
-  path: /blog/new
-  controller: App\Controller\BlogController::create
-  methods: [GET, POST]
-
-app_blog_edit:
-  path: /blog/{slug}/edit
-  controller: App\Controller\BlogController::edit
-  methods: [GET, POST]
-
-app_blog_delete:
-  path: /blog/{slug}
-  controller: App\Controller\BlogController::delete
-  methods: [DELETE]
-
-# -- Ripper (auth required) --
-app_ripper:
-  path: /ripper
-  controller: App\Controller\RipperController::index
-  methods: [GET]
-
-app_rip:
-  path: /rip
-  controller: App\Controller\RipperController::rip
-  methods: [POST]
-
-app_ripper_history:
-  path: /history
-  controller: App\Controller\RipperController::history
-  methods: [GET]
-
-app_ripper_download:
-  path: /ripper/download/{videoId}
-  controller: App\Controller\RipperController::download
-  methods: [GET]
-
-# -- Dividends (auth required) --
-app_dividends:
-  path: /dividends
-  controller: App\Controller\DividendController::index
-  methods: [GET]
-
-app_portfolio:
-  path: /portfolio
-  controller: App\Controller\DividendController::getPortfolio
-  methods: [GET]
-
-app_add_symbol:
-  path: /add-symbol
-  controller: App\Controller\DividendController::addSymbol
-  methods: [POST]
-
-app_upcoming_dividends:
-  path: /upcoming-dividends
-  controller: App\Controller\DividendController::getUpcomingDividends
-  methods: [GET]
-
-app_update_stock:
-  path: /update-stock
-  controller: App\Controller\DividendController::updateStock
-  methods: [PUT]
-
-app_delete_stock:
-  path: /delete-stock
-  controller: App\Controller\DividendController::deleteStock
-  methods: [DELETE]
-
-app_latest_prices:
-  path: /latest-prices
-  controller: App\Controller\DividendController::getPrices
-  methods: [GET]
-
-app_add_dividend:
-  path: /add-dividend
-  controller: App\Controller\DividendController::addDividend
-  methods: [POST]
-
-# -- Charts (auth required) --
-app_charts:
-  path: /charts
-  controller: App\Controller\ChartController::index
-  methods: [GET]
-
-app_charts_data:
-  path: /charts/data
-  controller: App\Controller\ChartController::getData
-  methods: [GET]
-
-app_charts_symbols:
-  path: /charts/symbols
-  controller: App\Controller\ChartController::getSymbols
-  methods: [GET]
-
-app_charts_in_range:
-  path: /charts/in-range
-  controller: App\Controller\ChartController::inRange
-  methods: [GET]
+    // -- Charts (auth required) --
+    $app->get('/charts',          [ChartController::class, 'index'])->add(TokenAuthMiddleware::class);
+    $app->get('/charts/data',     [ChartController::class, 'getData'])->add(TokenAuthMiddleware::class);
+    $app->get('/charts/symbols',  [ChartController::class, 'getSymbols'])->add(TokenAuthMiddleware::class);
+    $app->get('/charts/in-range', [ChartController::class, 'inRange'])->add(TokenAuthMiddleware::class);
+};
 ```
 
 ---
 
-## 4. Services Wiring (config/services.yaml)
+## 4. Services Wiring (config/container.php)
 
-```yaml
-services:
-  _defaults:
-    autowire: false
-    autoconfigure: false
-    public: false
+Plain PHP-DI definitions. Every dependency is explicit — no autowiring.
 
-  # -- PDO Connection (registered as service) --
-  pdo.connection:
-    class: PDO
-    arguments:
-      - 'mysql:host=%env(DB_HOST)%;dbname=%env(DB_NAME)%;charset=utf8'
-      - '%env(DB_USER)%'
-      - '%env(DB_PASS)%'
-    calls:
-      - [setAttribute, [!php/const PDO::ATTR_ERRMODE, !php/const PDO::ERRMODE_EXCEPTION]]
-      - [setAttribute, [!php/const PDO::ATTR_DEFAULT_FETCH_MODE, !php/const PDO::FETCH_ASSOC]]
-      - [setAttribute, [!php/const PDO::ATTR_EMULATE_PREPARES, false]]
+```php
+return [
+    // -- Twig --
+    Environment::class => function () {
+        $loader = new FilesystemLoader(dirname(__DIR__) . '/templates');
+        return new Environment($loader, [
+            'debug' => ($_ENV['APP_DEBUG'] ?? 'false') === 'true',
+            'cache' => ($_ENV['APP_ENV'] ?? 'dev') === 'prod'
+                ? dirname(__DIR__) . '/var/cache/twig'
+                : false,
+        ]);
+    },
 
-  # -- Repositories --
-  App\Repository\UserRepository:
-    arguments:
-      $db: '@pdo.connection'
+    // -- Database --
+    // Currently SQLite for local development. Will switch to MySQL before production.
+    // When switching: replace DSN and add DB_HOST/DB_NAME/DB_USER/DB_PASS to .env.
+    PDO::class => function () {
+        $pdo = new PDO('sqlite:' . dirname(__DIR__) . '/var/data.db');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+        return $pdo;
+    },
 
-  App\Repository\BlogRepository:
-    arguments:
-      $db: '@pdo.connection'
+    // -- Repositories --
+    UserRepository::class       => fn($c) => new UserRepository($c->get(PDO::class)),
+    BlogRepository::class       => fn($c) => new BlogRepository($c->get(PDO::class)),
+    RipperRepository::class     => fn($c) => new RipperRepository($c->get(PDO::class)),
+    PortfolioRepository::class  => fn($c) => new PortfolioRepository($c->get(PDO::class)),
+    SymbolRepository::class     => fn($c) => new SymbolRepository($c->get(PDO::class)),
 
-  App\Repository\RipperRepository:
-    arguments:
-      $db: '@pdo.connection'
+    // -- Services --
+    AuthTokenService::class   => fn($c) => new AuthTokenService($c->get(PDO::class)),
+    BlogService::class        => fn($c) => new BlogService($c->get(BlogRepository::class)),
+    DividendService::class    => fn($c) => new DividendService($c->get(PortfolioRepository::class)),
+    RipperService::class      => fn($c) => new RipperService(
+        $c->get(RipperRepository::class),
+        dirname(__DIR__) . '/var/downloads/',
+        dirname(__DIR__) . '/public/assets/ripper/thumbnails/',
+    ),
+    YahooFinanceService::class => fn($c) => new YahooFinanceService(
+        $c->get(SymbolRepository::class),
+        dirname(__DIR__) . '/var/cache/charts/',
+    ),
 
-  App\Repository\PortfolioRepository:
-    arguments:
-      $db: '@pdo.connection'
+    // -- Middleware --
+    TokenAuthMiddleware::class => fn($c) => new TokenAuthMiddleware(
+        $c->get(AuthTokenService::class),
+        $c->get(UserRepository::class),
+    ),
 
-  App\Repository\SymbolRepository:
-    arguments:
-      $db: '@pdo.connection'
-
-  # -- Services --
-  App\Service\AuthTokenService:
-    arguments:
-      $db: '@pdo.connection'
-
-  App\Service\BlogService:
-    arguments:
-      $blogRepository: '@App\Repository\BlogRepository'
-
-  App\Service\RipperService:
-    arguments:
-      $ripperRepository: '@App\Repository\RipperRepository'
-      $downloadDir: '%kernel.project_dir%/var/downloads/'
-      $thumbnailDir: '%kernel.project_dir%/public/assets/ripper/thumbnails/'
-
-  App\Service\DividendService:
-    arguments:
-      $portfolioRepository: '@App\Repository\PortfolioRepository'
-
-  App\Service\YahooFinanceService:
-    arguments:
-      $symbolRepository: '@App\Repository\SymbolRepository'
-      $cacheDir: '%kernel.project_dir%/var/cache/charts/'
-
-  # -- Security --
-  App\Security\TokenAuthenticator:
-    arguments:
-      $authTokenService: '@App\Service\AuthTokenService'
-      $userRepository: '@App\Repository\UserRepository'
-
-  # -- Controllers --
-  App\Controller\DashboardController:
-    arguments:
-      $twig: '@twig'
-    tags: ['controller.service_arguments']
-
-  App\Controller\AuthController:
-    arguments:
-      $twig: '@twig'
-      $userRepository: '@App\Repository\UserRepository'
-      $authTokenService: '@App\Service\AuthTokenService'
-    tags: ['controller.service_arguments']
-
-  App\Controller\BlogController:
-    arguments:
-      $twig: '@twig'
-      $blogService: '@App\Service\BlogService'
-    tags: ['controller.service_arguments']
-
-  App\Controller\RipperController:
-    arguments:
-      $twig: '@twig'
-      $ripperService: '@App\Service\RipperService'
-    tags: ['controller.service_arguments']
-
-  App\Controller\DividendController:
-    arguments:
-      $twig: '@twig'
-      $dividendService: '@App\Service\DividendService'
-      $yahooFinanceService: '@App\Service\YahooFinanceService'
-    tags: ['controller.service_arguments']
-
-  App\Controller\ChartController:
-    arguments:
-      $twig: '@twig'
-      $yahooFinanceService: '@App\Service\YahooFinanceService'
-    tags: ['controller.service_arguments']
+    // -- Controllers --
+    DashboardController::class => fn($c) => new DashboardController($c->get(Environment::class)),
+    AuthController::class      => fn($c) => new AuthController(
+        $c->get(Environment::class),
+        $c->get(UserRepository::class),
+        $c->get(AuthTokenService::class),
+    ),
+    BlogController::class      => fn($c) => new BlogController(
+        $c->get(Environment::class),
+        $c->get(BlogService::class),
+    ),
+    RipperController::class    => fn($c) => new RipperController(
+        $c->get(Environment::class),
+        $c->get(RipperService::class),
+    ),
+    DividendController::class  => fn($c) => new DividendController(
+        $c->get(Environment::class),
+        $c->get(DividendService::class),
+        $c->get(YahooFinanceService::class),
+    ),
+    ChartController::class     => fn($c) => new ChartController(
+        $c->get(Environment::class),
+        $c->get(YahooFinanceService::class),
+    ),
+];
 ```
 
 ---
 
 ## 5. Database — New Tables
+
+**Current target: SQLite** (`var/data.db`), for simplicity during development. This will switch to MySQL (`notquitehuman` DB) before production. The schema and migration runner are the same either way; only the PDO DSN in `config/container.php` changes.
 
 The existing tables (`users`, `auth_tokens`, `ripped_files`, `portfolio`, `dividend_payments`, `symbols`, `phinxlog`) are **untouched**. New SQL migration adds:
 
@@ -426,10 +306,10 @@ That's it for now. No blog comments, no categories table — keep it lean. Tags 
 | Days employed counter | Existing + prototype | Counter in header (start: **2024-05-28**) |
 | Blog | New | Public by default, hidden posts for auth-only, markdown content, tags |
 | Web Comics links | Prototype | Static links with icons |
-| YouTube Ripper | Existing (as-is) | Port logic into Symfony controllers, revisit later |
-| Portfolio/Dividends | Existing (as-is) | Port logic into Symfony controllers, revisit later |
+| YouTube Ripper | Existing (as-is) | Port logic into Slim controllers, revisit later |
+| Portfolio/Dividends | Existing (as-is) | Port logic into Slim controllers, revisit later |
 | Charts | Existing (as-is) | Port logic, keep vendored Chart.js |
-| Auth (token-based) | Existing | Carried forward, Symfony security integration |
+| Auth (token-based) | Existing | Carried forward — PSR-15 `TokenAuthMiddleware` |
 
 ### ❌ Out
 
@@ -506,17 +386,15 @@ The static content widgets (trading knowledge, economic indicators, server debug
 
 ## 8. Authentication Flow
 
-Keeping the existing approach but wrapping it in Symfony's security system:
-
 1. `POST /login` — validates credentials against `users` table, generates 30-day token in `auth_tokens`, returns JSON `{ success, token }`
 2. Client stores token in `localStorage` via `AuthManager`
 3. All subsequent requests include `Authorization: Bearer <token>`
-4. Custom `TokenAuthenticator` validates token on protected routes
+4. `TokenAuthMiddleware` (PSR-15, `src/Middleware/TokenAuthMiddleware.php`) validates the token on protected routes
 5. `POST /logout` — invalidates token server-side, client clears `localStorage`
 
-Symfony's `security.yaml` defines which routes need auth:
-- Public: `/`, `/login`, `/blog`, `/blog/{slug}`
-- Protected: everything else
+Route protection is declared per-route in `config/routes.php` via `->add(TokenAuthMiddleware::class)`:
+- Public (no middleware): `/`, `/login`, `/blog`, `/blog/{slug}`
+- Protected (middleware attached): everything else
 - Blog listing/view: public users see only `published = true` posts; logged-in users see all
 
 ---
@@ -647,8 +525,8 @@ These files are sacred. Copy them exactly:
 
 ## 12. Implementation Order
 
-1. **Scaffold** — `composer create-project symfony/skeleton`, add required packages
-2. **Config** — routes.yaml, services.yaml, security.yaml, .env with DB creds, PDO service
+1. **Scaffold** — `composer init`, add Slim 4 + PHP-DI + Twig + phpdotenv
+2. **Config** — `config/routes.php`, `config/container.php`, `config/middleware.php`, `.env`, PDO (SQLite)
 3. **Docker** — docker-compose.yml (PHP-FPM + Nginx + existing MySQL), Dockerfile
 4. **Base template** — Twig layout with header, dragonfly, counters, Feather Icons
 5. **Auth** — Login page, TokenAuthenticator, /login + /logout routes

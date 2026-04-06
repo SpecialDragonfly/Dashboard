@@ -1,0 +1,19 @@
+<div class="widget">
+    <h3 class="widget-title"><i data-feather="terminal"></i>Server Debugging</h3>
+    <div>My goto for initially troubleshooting a server is:</div>
+    <ul class="widget-list widget-list--mono">
+        <li><code>uptime </code> - uptime and CPU stress</li>
+        <li><code>w </code> - or better yet:last |head # who is/has been in</li>
+        <li><code>netstat -tlpn </code> - find server role</li>
+        <li><code>df -h </code> - out of disk space?</li>
+        <li><code>df -hi </code> - checking for inode availability</li>
+        <li><code>grep kill /var/log/messages </code> - out of memory?</li>
+        <li><code>ps auxf </code> - what's running</li>
+        <li><code>htop </code> - stressed? , look out for D (waiting on I/O typically) processes</li>
+        <li><code>history </code> - what has changed recently</li>
+        <li><code>tail /var/log/application.log </code> - anything interesting logged?</li>
+    </ul>
+</div>
+
+
+

@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ post.title }} — NotQuiteHuman{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="/assets/css/blog.css">
+{% endblock %}
+
+{% block body %}
+<div class="blog-container">
+    <article class="post-full">
+        <header class="post-header">
+            <div class="post-meta">
+                <a href="/blog" class="back-link"><i data-feather="arrow-left"></i> Blog</a>
+                <time datetime="{{ post.createdAt|date('Y-m-d') }}">
+                    {{ post.createdAt|date('d M Y') }}
+                </time>
+                {% if post.tagsArray is not empty %}
+                <div class="post-tags">
+                    {% for tag in post.tagsArray %}
+                    <span class="tag">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <h1>{{ post.title }}</h1>
+            <div class="post-actions auth-only" style="display:none">
+                <a href="/blog/{{ post.slug }}/edit" class="btn btn-sm">Edit</a>
+                <button class="btn btn-sm btn-danger" onclick="deletePost('{{ post.slug }}')">Delete</button>
+            </div>
+        </header>
+
+        <div class="post-body prose">
+            {{ content|raw }}
+        </div>
+
+        {% if post.updatedAt != post.createdAt %}
+        <footer class="post-footer">
+            <small>Updated {{ post.updatedAt|date('d M Y') }}</small>
+        </footer>
+        {% endif %}
+    </article>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="/assets/js/blog.js"></script>
+{% endblock %}
