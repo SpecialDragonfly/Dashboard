@@ -1,0 +1,119 @@
+.ripper-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.ripper-header h1 {
+    margin-bottom: 1.5rem;
+    font-size: 1.75rem;
+    font-weight: 600;
+}
+
+.rip-form {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.rip-form input[type="text"] {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    color: inherit;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.rip-form input[type="text"]:focus {
+    border-color: rgba(102, 126, 234, 0.6);
+}
+
+.rip-status {
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+.rip-status--info  { background: rgba(102, 126, 234, 0.15); color: #a5b4fc; }
+.rip-status--error { background: rgba(239, 68, 68, 0.15);   color: #fca5a5; }
+
+.history-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.875rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+}
+
+.history-item--pending {
+    opacity: 0.65;
+}
+
+.history-thumb {
+    flex-shrink: 0;
+    width: 80px;
+    height: 60px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.history-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.history-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-width: 0;
+}
+
+.history-title {
+    font-size: 0.9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.history-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.play-btn {
+    min-width: 2.2rem;
+}
+
+.badge {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.6rem;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    color: #94a3b8;
+}

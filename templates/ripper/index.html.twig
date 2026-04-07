@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ripper — NotQuiteHuman{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="/assets/css/ripper.css">
+{% endblock %}
+
+{% block body %}
+<div class="ripper-container">
+    <div class="ripper-header">
+        <h1>YouTube Ripper</h1>
+    </div>
+
+    <div class="card rip-form">
+        <input type="text" id="rip-url" placeholder="YouTube URL" autocomplete="off">
+        <button id="rip-btn" class="btn btn-primary">Rip</button>
+    </div>
+
+    <div id="rip-status" class="rip-status" style="display:none"></div>
+
+    <div id="history" class="history-grid"></div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="/assets/js/ripper.js"></script>
+{% endblock %}

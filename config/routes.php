@@ -3,6 +3,7 @@
 use App\Controller\AuthController;
 use App\Controller\BlogController;
 use App\Controller\DashboardController;
+use App\Controller\RipperController;
 use App\Middleware\OptionalAuthMiddleware;
 use App\Middleware\TokenAuthMiddleware;
 use Slim\App;
@@ -25,4 +26,11 @@ return function (App $app) {
     $app->post('/blog/{slug}/edit', [BlogController::class, 'edit'])->add(TokenAuthMiddleware::class);
     $app->delete('/blog/{slug}',    [BlogController::class, 'delete'])->add(TokenAuthMiddleware::class);
     $app->get('/blog/{slug}',       [BlogController::class, 'show']);
+
+    // -- Ripper (auth required) --
+    $app->get('/ripper',                      [RipperController::class, 'index'])->add(TokenAuthMiddleware::class);
+    $app->post('/rip',                        [RipperController::class, 'rip'])->add(TokenAuthMiddleware::class);
+    $app->get('/history',                     [RipperController::class, 'history'])->add(TokenAuthMiddleware::class);
+    $app->get('/ripper/download/{videoId}',   [RipperController::class, 'download'])->add(TokenAuthMiddleware::class);
+    $app->get('/ripper/stream/{videoId}',     [RipperController::class, 'stream'])->add(TokenAuthMiddleware::class);
 };
