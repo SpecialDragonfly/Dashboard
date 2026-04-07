@@ -18,6 +18,7 @@ return function (App $app) {
     $app->get('/blog',        [BlogController::class, 'index']);
 
     // -- Blog write (auth required) — /blog/new must come before /blog/{slug} --
+    $app->post('/blog/upload',       [BlogController::class, 'upload'])->add(TokenAuthMiddleware::class);
     $app->get('/blog/new',          [BlogController::class, 'create'])->add(TokenAuthMiddleware::class);
     $app->post('/blog/new',         [BlogController::class, 'create'])->add(TokenAuthMiddleware::class);
     $app->get('/blog/{slug}/edit',  [BlogController::class, 'edit'])->add(TokenAuthMiddleware::class);

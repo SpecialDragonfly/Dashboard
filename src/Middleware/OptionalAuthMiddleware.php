@@ -19,10 +19,12 @@ class OptionalAuthMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $authHeader = $request->getHeaderLine('Authorization');
+        $rawToken = str_starts_with($authHeader, 'Bearer ')
+            ? substr($authHeader, 7)
+            : ($request->getCookieParams()['nqh_token'] ?? null);
 
-        if (str_starts_with($authHeader, 'Bearer ')) {
-            $token = substr($authHeader, 7);
-            $userId = $this->authTokenService->validateToken($token);
+        if ($rawToken !== null) {
+            $userId = $this->authTokenService->validateToken($rawToken);
 
             if ($userId !== null) {
                 $user = $this->userRepository->findById($userId);

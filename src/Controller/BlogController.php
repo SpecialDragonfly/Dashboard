@@ -87,6 +87,37 @@ class BlogController extends AbstractController
         return $response;
     }
 
+    public function upload(Request $request, Response $response, array $args): Response
+    {
+        $file = ($request->getUploadedFiles())['image'] ?? null;
+
+        if ($file === null || $file->getError() !== UPLOAD_ERR_OK) {
+            $response->getBody()->write(json_encode(['error' => 'Upload failed']));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $allowedExts  = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $ext = strtolower(pathinfo($file->getClientFilename(), PATHINFO_EXTENSION));
+
+        if (!in_array($file->getClientMediaType(), $allowedMimes, true) || !in_array($ext, $allowedExts, true)) {
+            $response->getBody()->write(json_encode(['error' => 'Invalid file type']));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+
+        $filename  = date('Ymd') . '_' . bin2hex(random_bytes(6)) . '.' . $ext;
+        $uploadDir = dirname(__DIR__, 2) . '/public/assets/uploads/';
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $file->moveTo($uploadDir . $filename);
+
+        $response->getBody()->write(json_encode(['url' => '/assets/uploads/' . $filename]));
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
     public function delete(Request $request, Response $response, array $args): Response
     {
         $this->blogService->deletePost($args['slug']);

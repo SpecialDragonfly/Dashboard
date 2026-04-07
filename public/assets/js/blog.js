@@ -15,6 +15,36 @@ function mdWrap(before, after) {
     ta.focus();
 }
 
+function mdImagePick() {
+    document.getElementById('image-upload').click();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('image-upload')?.addEventListener('change', async function () {
+        const file = this.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const res = await AuthManager.fetch('/blog/upload', { method: 'POST', body: formData });
+        this.value = '';
+
+        if (!res || !res.ok) {
+            alert('Image upload failed');
+            return;
+        }
+
+        const { url } = await res.json();
+        const ta = document.getElementById('content');
+        const alt = file.name.replace(/\.[^.]+$/, '');
+        const md = `![${alt}](${url})`;
+        const pos = ta.selectionStart;
+        ta.setRangeText(md, pos, pos, 'end');
+        ta.focus();
+    });
+});
+
 function mdLink() {
     const ta = document.getElementById('content');
     if (!ta) return;

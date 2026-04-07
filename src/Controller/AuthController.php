@@ -39,7 +39,9 @@ class AuthController extends AbstractController
 
         $token = $this->authTokenService->generateToken($user->getId());
         $response->getBody()->write(json_encode(['success' => true, 'token' => $token]));
-        return $response->withHeader('Content-Type', 'application/json');
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withHeader('Set-Cookie', 'nqh_token=' . $token . '; Path=/; HttpOnly; SameSite=Lax');
     }
 
     public function logout(Request $request, Response $response, array $args): Response
@@ -49,6 +51,8 @@ class AuthController extends AbstractController
             $this->authTokenService->revokeToken(substr($authHeader, 7));
         }
         $response->getBody()->write(json_encode(['success' => true]));
-        return $response->withHeader('Content-Type', 'application/json');
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withHeader('Set-Cookie', 'nqh_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax');
     }
 }

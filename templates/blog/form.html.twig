@@ -35,7 +35,9 @@
                 <button type="button" onclick="mdLink()">Link</button>
                 <button type="button" onclick="mdWrap('`', '`')">Code</button>
                 <button type="button" onclick="mdWrap('\n```\n', '\n```')">Block</button>
+                <button type="button" onclick="mdImagePick()">Image</button>
             </div>
+            <input type="file" id="image-upload" accept="image/*" style="display:none">
             <textarea id="content" name="content" rows="20" required>{{ post ? post.content : '' }}</textarea>
         </div>
 
