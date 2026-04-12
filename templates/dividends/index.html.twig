@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dividends — NotQuiteHuman{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="/assets/css/dividends.css">
+{% endblock %}
+
+{% block body %}
+<div class="dividends-container">
+
+    <div class="dividends-header">
+        <h1>Dividend Portfolio</h1>
+    </div>
+
+    <section class="portfolio-section card">
+        <h2>Portfolio</h2>
+        <div class="table-wrap">
+            <table class="portfolio-table" id="portfolio-table">
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Name</th>
+                        <th class="num">Qty</th>
+                        <th class="num">Avg (p)</th>
+                        <th class="num">Price (p)</th>
+                        <th>Last checked</th>
+                        <th>Ex-div</th>
+                        <th>Dividend</th>
+                        <th class="num">Received (p)</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="portfolio-body">
+                    <tr><td colspan="10" class="loading">Loading…</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <form id="add-stock-form" class="add-stock-form">
+            <input type="text"   id="stock-symbol"   placeholder="Symbol (e.g. LLOY)" autocomplete="off" required>
+            <input type="text"   id="stock-name"     placeholder="Name" autocomplete="off" required>
+            <input type="number" id="stock-quantity"  placeholder="Qty" step="any" min="0.001" required>
+            <input type="number" id="stock-price"    placeholder="Avg price (p)" step="0.01" min="0.01" required>
+            <button type="submit" class="btn btn-primary">Add stock</button>
+        </form>
+    </section>
+
+    <section id="chart-panel" class="chart-panel card" style="display:none">
+        <div class="chart-header">
+            <h2 id="chart-title">—</h2>
+            <button id="close-chart" class="btn btn-sm">Close</button>
+        </div>
+        <canvas id="price-chart"></canvas>
+    </section>
+
+    <section class="payment-section card">
+        <h2>Record dividend payment</h2>
+        <form id="add-payment-form" class="add-payment-form">
+            <select id="payment-symbol" required>
+                <option value="">Select stock…</option>
+            </select>
+            <input type="date"   id="payment-date"   required>
+            <input type="number" id="payment-amount" placeholder="Amount (p)" min="1" required>
+            <button type="submit" class="btn btn-primary">Record</button>
+        </form>
+    </section>
+
+    <section class="upcoming-section card">
+        <div class="upcoming-header">
+            <h2>Upcoming dividends</h2>
+            <span id="upcoming-status" class="badge"></span>
+        </div>
+        <div id="upcoming-list"></div>
+    </section>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.1.1/dist/chartjs-chart-financial.min.js"></script>
+<script src="/assets/js/dividends.js"></script>
+{% endblock %}

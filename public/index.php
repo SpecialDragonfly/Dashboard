@@ -10,7 +10,11 @@ $dotenv->safeLoad();
 
 $builder = new ContainerBuilder();
 $builder->addDefinitions(require dirname(__DIR__) . '/config/container.php');
-$container = $builder->build();
+try {
+    $container = $builder->build();
+} catch (Exception $e) {
+    error_log(print_r($e, true));
+}
 
 AppFactory::setContainer($container);
 $app = AppFactory::create();

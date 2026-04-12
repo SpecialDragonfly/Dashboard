@@ -1,0 +1,340 @@
+.dividends-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.dividends-header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+/* Cards */
+.card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+}
+
+.card h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text);
+}
+
+/* Portfolio table */
+.table-wrap {
+    overflow-x: auto;
+    margin-bottom: 1.25rem;
+}
+
+.portfolio-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.portfolio-table th,
+.portfolio-table td {
+    padding: 0.55rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--glass-border);
+    white-space: nowrap;
+}
+
+.portfolio-table th {
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.portfolio-table th.num,
+.portfolio-table td.num {
+    text-align: right;
+}
+
+.portfolio-table tbody tr {
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+.portfolio-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.portfolio-table tbody tr.active-row {
+    background: rgba(102, 126, 234, 0.08);
+}
+
+.stock-symbol {
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.price-cell {
+    font-variant-numeric: tabular-nums;
+}
+
+.last-checked {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.last-checked-stale {
+    color: #e0a050;
+}
+
+.exdiv-cell,
+.dividend-cell {
+    min-width: 90px;
+}
+
+.editable-field {
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed var(--glass-border);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.875rem;
+    width: 100%;
+    padding: 0.1rem 0.2rem;
+    cursor: text;
+}
+
+.editable-field:focus {
+    outline: none;
+    border-bottom-color: var(--accent);
+}
+
+.received-cell {
+    font-variant-numeric: tabular-nums;
+    color: #6bcb77;
+}
+
+.delete-btn {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.75rem;
+    color: var(--danger);
+    border-color: transparent;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 4px;
+    font-family: var(--font);
+}
+
+.delete-btn:hover {
+    background: rgba(224, 92, 106, 0.12);
+}
+
+/* Add stock form */
+.add-stock-form {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.add-stock-form input {
+    padding: 0.45rem 0.75rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 0.875rem;
+    transition: border-color 0.15s;
+}
+
+.add-stock-form input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.add-stock-form input[id="stock-symbol"]   { width: 100px; }
+.add-stock-form input[id="stock-name"]     { flex: 1; min-width: 140px; }
+.add-stock-form input[id="stock-quantity"] { width: 80px; }
+.add-stock-form input[id="stock-price"]    { width: 110px; }
+
+/* Chart panel */
+.chart-panel .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+#price-chart {
+    max-height: 340px;
+}
+
+/* Payment form */
+.add-payment-form {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.add-payment-form select,
+.add-payment-form input {
+    padding: 0.45rem 0.75rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 0.875rem;
+}
+
+.add-payment-form select:focus,
+.add-payment-form input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.add-payment-form select option {
+    background: #1a1a2e;
+}
+
+/* Upcoming dividends */
+.progress-bar-track {
+    height: 6px;
+    background: var(--glass-border);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border-radius: 99px;
+    transition: width 0.3s ease;
+}
+
+.progress-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.upcoming-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 99px;
+    background: rgba(102, 126, 234, 0.15);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    color: var(--accent);
+}
+
+.upcoming-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.upcoming-table th,
+.upcoming-table td {
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--glass-border);
+    white-space: nowrap;
+}
+
+.upcoming-table th {
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.upcoming-symbol {
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.upcoming-owned {
+    font-size: 0.72rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    background: rgba(107, 203, 119, 0.15);
+    border: 1px solid rgba(107, 203, 119, 0.3);
+    color: #6bcb77;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+}
+
+.empty-state { color: var(--text-muted); font-style: italic; }
+
+/* Yahoo Finance cookie upload */
+.cookie-help {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.cookie-guide {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+}
+
+.cookie-guide summary {
+    cursor: pointer;
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+}
+
+.cookie-guide ol {
+    padding-left: 1.4rem;
+    line-height: 1.8;
+}
+
+.cookie-guide code {
+    font-family: monospace;
+    background: rgba(255,255,255,0.06);
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+}
+
+.cookie-note {
+    margin-top: 0.75rem;
+    font-style: italic;
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+.cookie-upload-form {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.cookie-upload-form input[type="file"] {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.cookie-status {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.cookie-status-ok  { color: #6bcb77; }
+.cookie-status-err { color: var(--danger); }
