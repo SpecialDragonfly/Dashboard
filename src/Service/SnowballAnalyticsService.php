@@ -29,7 +29,7 @@ class SnowballAnalyticsService implements DividendCalendarInterface
 
         $results = [];
         $page = 1;
-        $recordIndex = 0;
+        $totalPages = 1;
 
         do {
             $url = self::API_BASE . '?' . http_build_query(
@@ -64,8 +64,9 @@ class SnowballAnalyticsService implements DividendCalendarInterface
 
             $data = json_decode($body, true) ?? [];
             $items = $data['data'] ?? [];
-            $totalRecords = min((int)($data['totalCount'] ?? 1), self::MAX_PAGES);
-            $recordIndex += (int)$data['pageSize'];
+            $totalCount = (int)($data['totalCount'] ?? 0);
+            $pageSize = (int)($data['pageSize'] ?? 50);
+            $totalPages = (int) ceil($totalCount / max($pageSize, 1));
 
             foreach ($items as $item) {
                 if (($item['status'] ?? '') !== 'declared') {
@@ -91,7 +92,7 @@ class SnowballAnalyticsService implements DividendCalendarInterface
             }
 
             $page++;
-        } while ($totalRecords > $recordIndex);
+        } while ($page <= min($totalPages, self::MAX_PAGES));
 
         file_put_contents($cacheFile, json_encode($results));
         return $results;
