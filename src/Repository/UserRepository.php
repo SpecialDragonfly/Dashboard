@@ -32,7 +32,7 @@ class UserRepository
             (int) $row['id'],
             $row['username'],
             $row['password'],
-            new DateTimeImmutable($row['created']),
+            $row['created'] !== null ? new DateTimeImmutable($row['created']) : null,
         );
     }
 }

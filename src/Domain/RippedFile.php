@@ -13,7 +13,7 @@ class RippedFile
         private ?string $title,
         private ?string $thumbnail,
         private ?string $path,
-        private DateTimeImmutable $createdAt,
+        private ?DateTimeImmutable $createdAt,
     ) {}
 
     public function getId(): int { return $this->id; }
@@ -23,5 +23,5 @@ class RippedFile
     public function getThumbnail(): ?string { return $this->thumbnail; }
     public function getPath(): ?string { return $this->path; }
     public function isReady(): bool { return $this->path !== null; }
-    public function getCreatedAt(): DateTimeImmutable { return $this->createdAt; }
+    public function getCreatedAt(): ?DateTimeImmutable { return $this->createdAt; }
 }

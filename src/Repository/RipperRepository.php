@@ -67,7 +67,7 @@ class RipperRepository
             $row['title'],
             $row['thumbnail'],
             $row['path'],
-            new DateTimeImmutable($row['created']),
+            $row['created'] !== null ? new DateTimeImmutable($row['created']) : null,
         );
     }
 }

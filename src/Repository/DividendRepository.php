@@ -14,7 +14,7 @@ class DividendRepository
     public function getPortfolio(): array
     {
         $sql = <<<SQL
-SELECT p.id, p.symbol, p.name, p.quantity, p.price, p."ex-div", p.dividend,
+SELECT p.id, p.symbol, p.name, p.quantity, p.price, p.`ex-div`, p.dividend,
        COALESCE(SUM(d.amount), 0) AS total_dividend_payments
 FROM portfolio p
 LEFT JOIN dividend_payments d ON p.id = d.symbol_id
@@ -30,7 +30,7 @@ SQL;
     public function findBySymbol(string $symbol): ?Stock
     {
         $stmt = $this->db->prepare(
-            'SELECT id, symbol, name, quantity, price, "ex-div", dividend FROM portfolio WHERE symbol = :symbol AND deleted = 0'
+            'SELECT id, symbol, name, quantity, price, `ex-div`, dividend FROM portfolio WHERE symbol = :symbol AND deleted = 0'
         );
         $stmt->bindValue(':symbol', $symbol);
         $stmt->execute();
@@ -54,7 +54,7 @@ SQL;
     public function updateStockQuantityAndPrice(string $symbol, float $quantity, float $price): bool
     {
         $stmt = $this->db->prepare(
-            'UPDATE portfolio SET quantity = :quantity, price = :price, "ex-div" = NULL, dividend = NULL WHERE symbol = :symbol AND deleted = 0'
+            'UPDATE portfolio SET quantity = :quantity, price = :price, `ex-div` = NULL, dividend = NULL WHERE symbol = :symbol AND deleted = 0'
         );
         $stmt->bindValue(':symbol', $symbol);
         $stmt->bindValue(':quantity', $quantity);
@@ -65,7 +65,7 @@ SQL;
     public function updateStockDividendInfo(string $symbol, string $exDiv, string $dividend): bool
     {
         $stmt = $this->db->prepare(
-            'UPDATE portfolio SET "ex-div" = :exDiv, dividend = :dividend WHERE symbol = :symbol AND deleted = 0'
+            'UPDATE portfolio SET `ex-div` = :exDiv, dividend = :dividend WHERE symbol = :symbol AND deleted = 0'
         );
         $stmt->bindValue(':exDiv', $exDiv);
         $stmt->bindValue(':dividend', $dividend);
@@ -93,7 +93,7 @@ SQL;
 
     public function getSymbolLastChecked(string $ticker): int
     {
-        $stmt = $this->db->prepare('SELECT "last-checked" FROM symbols WHERE ticker = :ticker');
+        $stmt = $this->db->prepare('SELECT `last-checked` FROM symbols WHERE ticker = :ticker');
         $stmt->bindValue(':ticker', $ticker);
         $stmt->execute();
         $row = $stmt->fetch();
@@ -106,7 +106,7 @@ SQL;
         // on a unique-constraint hit (ticker already exists) update instead.
         // Avoids SQLite's ON CONFLICT (no MySQL equivalent) and MySQL's
         // ON DUPLICATE KEY UPDATE (no SQLite equivalent).
-        $insert = $this->db->prepare('INSERT INTO symbols (ticker, "last-checked") VALUES (:ticker, :time)');
+        $insert = $this->db->prepare('INSERT INTO symbols (ticker, `last-checked`) VALUES (:ticker, :time)');
         $insert->bindValue(':ticker', $ticker);
         $insert->bindValue(':time', $time);
 
@@ -116,7 +116,7 @@ SQL;
             if ($e->getCode() !== '23000') {
                 throw $e;
             }
-            $update = $this->db->prepare('UPDATE symbols SET "last-checked" = :time WHERE ticker = :ticker');
+            $update = $this->db->prepare('UPDATE symbols SET `last-checked` = :time WHERE ticker = :ticker');
             $update->bindValue(':ticker', $ticker);
             $update->bindValue(':time', $time);
             $update->execute();
