@@ -28,6 +28,7 @@
         }
     },
     "require-dev": {
+        "phpstan/phpstan": "^2.2",
         "phpunit/phpunit": "^11",
         "robmorgan/phinx": "^0.16.12"
     }

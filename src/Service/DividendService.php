@@ -15,11 +15,24 @@ class DividendService
         private string $freetradeCsvPath,
     ) {}
 
+    /**
+     * @return array<array{
+     *     id: int,
+     *     symbol: string,
+     *     name: string,
+     *     quantity: float,
+     *     price: float,
+     *     exDiv: ?string,
+     *     dividend: ?string,
+     *     totalDividendPayments: float,
+     * }>
+     */
     public function getPortfolio(): array
     {
         return array_map(fn(Stock $s) => $s->toArray(), $this->repo->getPortfolio());
     }
 
+    /** @return array{symbol: string, quantity: float, price: float} */
     public function addStock(string $symbol, string $name, float $quantity, float $price): array
     {
         $existing = $this->repo->findBySymbol($symbol);
@@ -50,7 +63,10 @@ class DividendService
         return $this->repo->addPayment($symbolId, $date, $amount);
     }
 
-    /** @return array[] StockQuote::toArray() per symbol, or ['symbol' => ..., 'error' => ...] on failure */
+    /**
+     * @param list<string> $symbols
+     * @return list<array<string, mixed>> StockQuote::toArray() per symbol, or ['symbol' => ..., 'error' => ...] on failure
+     */
     public function getPrices(array $symbols): array
     {
         $results = [];
@@ -90,16 +106,20 @@ class DividendService
         }
     }
 
-    /** @return array[] Each entry: ['date' => string, 'value' => float] */
+    /** @return array<int, array{date: string, value: float}> */
     public function getPortfolioGrowth(): array
     {
         $this->ensureTodaySnapshot();
         return $this->repo->getGrowthHistory();
     }
 
+    /** @return list<string> */
     private function freetradeSymbols(): array
     {
         $csv = file_get_contents($this->freetradeCsvPath);
+        if ($csv === false) {
+            throw new \RuntimeException("Unable to read Freetrade CSV at {$this->freetradeCsvPath}");
+        }
         $symbols = array_values(array_filter(array_map('trim', explode(',', $csv)), fn($s) => $s !== ''));
         sort($symbols);
         return $symbols;
@@ -110,7 +130,14 @@ class DividendService
      * Freetrade universe, returning only those with a future ex-dividend date,
      * sorted ascending by that date.
      *
-     * @return array[] Each entry: symbol, name, exDivDate, exDivTimestamp, amount
+     * @return list<array{
+     *     symbol: string,
+     *     name: string,
+     *     exDivDate: string,
+     *     exDivTimestamp: int,
+     *     amount: int|float|string|null,
+     *     currency: string,
+     * }>
      */
     public function getUpcomingDividends(): array
     {
@@ -132,11 +159,11 @@ class DividendService
                 'exDivDate'      => $item['exDivDate'],
                 'exDivTimestamp' => $item['exDivTimestamp'],
                 'amount'         => $item['amount'],
-                'currency'       => $item['currency'] ?? '',
+                'currency'       => $item['currency'],
             ];
         }
 
-        usort($results, fn($a, $b) => $a['exDivTimestamp'] - $b['exDivTimestamp']);
+        usort($results, fn(array $a, array $b) => $a['exDivTimestamp'] - $b['exDivTimestamp']);
         return $results;
     }
 }

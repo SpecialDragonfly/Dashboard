@@ -24,6 +24,18 @@ class Stock
     public function getDividend(): ?string { return $this->dividend; }
     public function getTotalDividendPayments(): float { return $this->totalDividendPayments; }
 
+    /**
+     * @return array{
+     *     id: int,
+     *     symbol: string,
+     *     name: string,
+     *     quantity: float,
+     *     price: float,
+     *     exDiv: ?string,
+     *     dividend: ?string,
+     *     totalDividendPayments: float,
+     * }
+     */
     public function toArray(): array
     {
         return [

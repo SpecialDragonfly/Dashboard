@@ -14,6 +14,9 @@ class RipperController extends AbstractController
         private RipperService $ripperService,
     ) {}
 
+    /**
+     * @param array<string, string> $args
+     */
     public function index(Request $request, Response $response, array $args): Response
     {
         $response->getBody()->write(
@@ -22,30 +25,42 @@ class RipperController extends AbstractController
         return $response;
     }
 
+    /**
+     * @param array<string, string> $args
+     */
     public function rip(Request $request, Response $response, array $args): Response
     {
         $body = (array) $request->getParsedBody();
-        $url  = trim($body['url'] ?? '');
+        $url  = isset($body['url']) && is_string($body['url']) ? trim($body['url']) : '';
 
         if ($url === '') {
-            $response->getBody()->write(json_encode(['status' => 'error', 'message' => 'No URL provided']));
+            $json = json_encode(['status' => 'error', 'message' => 'No URL provided']);
+            $response->getBody()->write($json === false ? '' : $json);
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
         $result = $this->ripperService->rip($url);
-        $response->getBody()->write(json_encode($result));
+        $json   = json_encode($result);
+        $response->getBody()->write($json === false ? '' : $json);
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    /**
+     * @param array<string, string> $args
+     */
     public function history(Request $request, Response $response, array $args): Response
     {
-        $response->getBody()->write(json_encode($this->ripperService->getHistory()));
+        $json = json_encode($this->ripperService->getHistory());
+        $response->getBody()->write($json === false ? '' : $json);
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    /**
+     * @param array<string, string> $args
+     */
     public function download(Request $request, Response $response, array $args): Response
     {
-        $videoId = $args['videoId'];
+        $videoId = $args['videoId'] ?? '';
         $path    = $this->ripperService->getDownloadPath($videoId);
 
         if ($path === null || !file_exists($path)) {
@@ -60,17 +75,26 @@ class RipperController extends AbstractController
 
         $body = $response->getBody();
         $fp   = fopen($path, 'rb');
+        if ($fp === false) {
+            return $response->withStatus(500);
+        }
         while (!feof($fp)) {
-            $body->write(fread($fp, 8192));
+            $chunk = fread($fp, 8192);
+            if ($chunk !== false) {
+                $body->write($chunk);
+            }
         }
         fclose($fp);
 
         return $response;
     }
 
+    /**
+     * @param array<string, string> $args
+     */
     public function stream(Request $request, Response $response, array $args): Response
     {
-        $videoId = $args['videoId'];
+        $videoId = $args['videoId'] ?? '';
         $path    = $this->ripperService->getDownloadPath($videoId);
 
         if ($path === null || !file_exists($path)) {
@@ -83,8 +107,14 @@ class RipperController extends AbstractController
 
         $body = $response->getBody();
         $fp   = fopen($path, 'rb');
+        if ($fp === false) {
+            return $response->withStatus(500);
+        }
         while (!feof($fp)) {
-            $body->write(fread($fp, 8192));
+            $chunk = fread($fp, 8192);
+            if ($chunk !== false) {
+                $body->write($chunk);
+            }
         }
         fclose($fp);
 

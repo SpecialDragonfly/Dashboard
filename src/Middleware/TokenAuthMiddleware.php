@@ -20,9 +20,12 @@ class TokenAuthMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $authHeader = $request->getHeaderLine('Authorization');
-        $rawToken = str_starts_with($authHeader, 'Bearer ')
-            ? substr($authHeader, 7)
-            : ($request->getCookieParams()['nqh_token'] ?? null);
+        if (str_starts_with($authHeader, 'Bearer ')) {
+            $rawToken = substr($authHeader, 7);
+        } else {
+            $cookieToken = $request->getCookieParams()['nqh_token'] ?? null;
+            $rawToken = is_string($cookieToken) ? $cookieToken : null;
+        }
 
         if ($rawToken !== null) {
             $userId = $this->authTokenService->validateToken($rawToken);
@@ -41,7 +44,8 @@ class TokenAuthMiddleware implements MiddlewareInterface
         }
 
         $response = new Response(401);
-        $response->getBody()->write(json_encode(['error' => 'Unauthorized']));
+        $body = json_encode(['error' => 'Unauthorized']);
+        $response->getBody()->write($body === false ? '{"error":"Unauthorized"}' : $body);
         return $response->withHeader('Content-Type', 'application/json');
     }
 }

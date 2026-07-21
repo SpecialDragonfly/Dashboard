@@ -2,10 +2,12 @@
 
 namespace App\Controller;
 
+use App\Domain\User;
 use App\Service\BlogService;
 use League\CommonMark\CommonMarkConverter;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\UploadedFileInterface;
 use Twig\Environment;
 
 class BlogController extends AbstractController
@@ -19,6 +21,9 @@ class BlogController extends AbstractController
         $this->markdown = new CommonMarkConverter(['html_input' => 'strip']);
     }
 
+    /**
+     * @param array<string, string> $args
+     */
     public function index(Request $request, Response $response, array $args): Response
     {
         $posts = $this->blogService->getPublishedPosts();
@@ -27,6 +32,9 @@ class BlogController extends AbstractController
         return $response;
     }
 
+    /**
+     * @param array<string, string> $args
+     */
     public function show(Request $request, Response $response, array $args): Response
     {
         $post = $this->blogService->getPost($args['slug']);
@@ -41,17 +49,29 @@ class BlogController extends AbstractController
         return $response;
     }
 
+    /**
+     * @param array<string, string> $args
+     */
     public function create(Request $request, Response $response, array $args): Response
     {
         $user = $request->getAttribute('user');
 
         if ($request->getMethod() === 'POST') {
-            $body = (array) $request->getParsedBody();
+            if (!$user instanceof User) {
+                return $response->withStatus(401);
+            }
+
+            $body = $request->getParsedBody();
+            $body = is_array($body) ? $body : [];
+            $title = isset($body['title']) && is_string($body['title']) ? trim($body['title']) : '';
+            $content = isset($body['content']) && is_string($body['content']) ? trim($body['content']) : '';
+            $tags = isset($body['tags']) && is_string($body['tags']) ? trim($body['tags']) : '';
+
             $post = $this->blogService->createPost(
                 $user->getId(),
-                trim($body['title'] ?? ''),
-                trim($body['content'] ?? ''),
-                trim($body['tags'] ?? '') ?: null,
+                $title,
+                $content,
+                $tags !== '' ? $tags : null,
                 isset($body['published']),
             );
             return $response->withHeader('Location', '/blog/' . $post->getSlug())->withStatus(302);
@@ -62,6 +82,9 @@ class BlogController extends AbstractController
         return $response;
     }
 
+    /**
+     * @param array<string, string> $args
+     */
     public function edit(Request $request, Response $response, array $args): Response
     {
         $post = $this->blogService->getPost($args['slug']);
@@ -70,12 +93,17 @@ class BlogController extends AbstractController
         }
 
         if ($request->getMethod() === 'POST') {
-            $body = (array) $request->getParsedBody();
+            $body = $request->getParsedBody();
+            $body = is_array($body) ? $body : [];
+            $title = isset($body['title']) && is_string($body['title']) ? trim($body['title']) : '';
+            $content = isset($body['content']) && is_string($body['content']) ? trim($body['content']) : '';
+            $tags = isset($body['tags']) && is_string($body['tags']) ? trim($body['tags']) : '';
+
             $updated = $this->blogService->updatePost(
                 $args['slug'],
-                trim($body['title'] ?? ''),
-                trim($body['content'] ?? ''),
-                trim($body['tags'] ?? '') ?: null,
+                $title,
+                $content,
+                $tags !== '' ? $tags : null,
                 isset($body['published']),
             );
             $slug = $updated ? $updated->getSlug() : $args['slug'];
@@ -87,21 +115,24 @@ class BlogController extends AbstractController
         return $response;
     }
 
+    /**
+     * @param array<string, string> $args
+     */
     public function upload(Request $request, Response $response, array $args): Response
     {
         $file = ($request->getUploadedFiles())['image'] ?? null;
 
-        if ($file === null || $file->getError() !== UPLOAD_ERR_OK) {
-            $response->getBody()->write(json_encode(['error' => 'Upload failed']));
+        if (!$file instanceof UploadedFileInterface || $file->getError() !== UPLOAD_ERR_OK) {
+            $response->getBody()->write(json_encode(['error' => 'Upload failed'], JSON_THROW_ON_ERROR));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
         $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         $allowedExts  = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-        $ext = strtolower(pathinfo($file->getClientFilename(), PATHINFO_EXTENSION));
+        $ext = strtolower(pathinfo($file->getClientFilename() ?? '', PATHINFO_EXTENSION));
 
         if (!in_array($file->getClientMediaType(), $allowedMimes, true) || !in_array($ext, $allowedExts, true)) {
-            $response->getBody()->write(json_encode(['error' => 'Invalid file type']));
+            $response->getBody()->write(json_encode(['error' => 'Invalid file type'], JSON_THROW_ON_ERROR));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
@@ -114,14 +145,17 @@ class BlogController extends AbstractController
 
         $file->moveTo($uploadDir . $filename);
 
-        $response->getBody()->write(json_encode(['url' => '/assets/uploads/' . $filename]));
+        $response->getBody()->write(json_encode(['url' => '/assets/uploads/' . $filename], JSON_THROW_ON_ERROR));
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    /**
+     * @param array<string, string> $args
+     */
     public function delete(Request $request, Response $response, array $args): Response
     {
         $this->blogService->deletePost($args['slug']);
-        $response->getBody()->write(json_encode(['success' => true]));
+        $response->getBody()->write(json_encode(['success' => true], JSON_THROW_ON_ERROR));
         return $response->withHeader('Content-Type', 'application/json');
     }
 }

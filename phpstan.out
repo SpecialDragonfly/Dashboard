@@ -1,0 +1,1092 @@
+Note: Using configuration file /home/dom/Projects/Old/Projects/notquitehuman.new/phpstan.neon.
+Instructions for interpreting errors
+---------
+
+Each error has an associated identifier, like `argument.type`
+or `return.missing`.
+
+Each error identifier has documentation at URL https://phpstan.org/error-identifiers/<identifier>
+This page contains code example, explanation why is this an error
+and instruction how to fix it.
+Before fixing the error, fetch the documentation page for its identifier.
+
+The error usually indicates a real bug or incorrect type in the code. Fix the underlying cause, do not just make the error go away.
+Do not add `@phpstan-ignore` comments, `@phpstan-ignore-next-line` comments, or baseline entries to suppress the error.
+Do not use assert() or inline @var PHPDoc tag to override PHPStan's inferred type.
+Do not add type casts just to silence errors.
+Do not widen parameter or return types just to make the error go away.
+ ------ ----------------------------------------------------------------------- 
+  Line   config/container.php                                                   
+ ------ ----------------------------------------------------------------------- 
+  45     Deprecated in PHP 8.4: Parameter #2 $default (string) is implicitly    
+         nullable via default value null.                                       
+         🪪  parameter.implicitlyNullable                                        
+  49     Parameter #2 ...$values of function sprintf expects                    
+         bool|float|int|string|null, mixed given.                               
+         🪪  argument.type                                                       
+  50     Parameter #3 ...$values of function sprintf expects                    
+         bool|float|int|string|null, mixed given.                               
+         🪪  argument.type                                                       
+  51     Parameter #4 ...$values of function sprintf expects                    
+         bool|float|int|string|null, mixed given.                               
+         🪪  argument.type                                                       
+  53     Parameter #2 $username of class PDO constructor expects string|null,   
+         mixed given.                                                           
+         🪪  argument.type                                                       
+  53     Parameter #3 $password of class PDO constructor expects string|null,   
+         mixed given.                                                           
+         🪪  argument.type                                                       
+  64     Parameter #1 $db of class App\Repository\UserRepository constructor    
+         expects PDO, mixed given.                                              
+         🪪  argument.type                                                       
+  65     Parameter #1 $db of class App\Repository\BlogRepository constructor    
+         expects PDO, mixed given.                                              
+         🪪  argument.type                                                       
+  66     Parameter #1 $db of class App\Repository\RipperRepository constructor  
+         expects PDO, mixed given.                                              
+         🪪  argument.type                                                       
+  67     Parameter #1 $db of class App\Repository\DividendRepository            
+         constructor expects PDO, mixed given.                                  
+         🪪  argument.type                                                       
+  70     Parameter #1 $db of class App\Service\AuthTokenService constructor     
+         expects PDO, mixed given.                                              
+         🪪  argument.type                                                       
+  71     Parameter #1 $repo of class App\Service\BlogService constructor        
+         expects App\Repository\BlogRepository, mixed given.                    
+         🪪  argument.type                                                       
+  74     Parameter #2 $repo of class App\Service\YahooFinanceService            
+         constructor expects App\Repository\DividendRepository, mixed given.    
+         🪪  argument.type                                                       
+  81     Parameter #1 $repo of class App\Service\DividendService constructor    
+         expects App\Repository\DividendRepository, mixed given.                
+         🪪  argument.type                                                       
+  82     Parameter #2 $yahoo of class App\Service\DividendService constructor   
+         expects App\Service\YahooFinanceService, mixed given.                  
+         🪪  argument.type                                                       
+  83     Parameter #3 $calendar of class App\Service\DividendService            
+         constructor expects App\Service\DividendCalendarInterface, mixed       
+         given.                                                                 
+         🪪  argument.type                                                       
+  87     Parameter #1 $repo of class App\Service\RipperService constructor      
+         expects App\Repository\RipperRepository, mixed given.                  
+         🪪  argument.type                                                       
+  94     Parameter #1 $authTokenService of class                                
+         App\Middleware\TokenAuthMiddleware constructor expects                 
+         App\Service\AuthTokenService, mixed given.                             
+         🪪  argument.type                                                       
+  95     Parameter #2 $userRepository of class                                  
+         App\Middleware\TokenAuthMiddleware constructor expects                 
+         App\Repository\UserRepository, mixed given.                            
+         🪪  argument.type                                                       
+  98     Parameter #1 $authTokenService of class                                
+         App\Middleware\OptionalAuthMiddleware constructor expects              
+         App\Service\AuthTokenService, mixed given.                             
+         🪪  argument.type                                                       
+  99     Parameter #2 $userRepository of class                                  
+         App\Middleware\OptionalAuthMiddleware constructor expects              
+         App\Repository\UserRepository, mixed given.                            
+         🪪  argument.type                                                       
+  104    Parameter #1 $twig of class App\Controller\DashboardController         
+         constructor expects Twig\Environment, mixed given.                     
+         🪪  argument.type                                                       
+  105    Parameter #2 $blogService of class App\Controller\DashboardController  
+         constructor expects App\Service\BlogService, mixed given.              
+         🪪  argument.type                                                       
+  108    Parameter #1 $twig of class App\Controller\AuthController constructor  
+         expects Twig\Environment, mixed given.                                 
+         🪪  argument.type                                                       
+  109    Parameter #2 $userRepository of class App\Controller\AuthController    
+         constructor expects App\Repository\UserRepository, mixed given.        
+         🪪  argument.type                                                       
+  110    Parameter #3 $authTokenService of class App\Controller\AuthController  
+         constructor expects App\Service\AuthTokenService, mixed given.         
+         🪪  argument.type                                                       
+  113    Parameter #1 $twig of class App\Controller\BlogController constructor  
+         expects Twig\Environment, mixed given.                                 
+         🪪  argument.type                                                       
+  114    Parameter #2 $blogService of class App\Controller\BlogController       
+         constructor expects App\Service\BlogService, mixed given.              
+         🪪  argument.type                                                       
+  117    Parameter #1 $twig of class App\Controller\RipperController            
+         constructor expects Twig\Environment, mixed given.                     
+         🪪  argument.type                                                       
+  118    Parameter #2 $ripperService of class App\Controller\RipperController   
+         constructor expects App\Service\RipperService, mixed given.            
+         🪪  argument.type                                                       
+  121    Parameter #1 $twig of class App\Controller\DividendController          
+         constructor expects Twig\Environment, mixed given.                     
+         🪪  argument.type                                                       
+  122    Parameter #2 $dividendService of class                                 
+         App\Controller\DividendController constructor expects                  
+         App\Service\DividendService, mixed given.                              
+         🪪  argument.type                                                       
+  125    Parameter #1 $twig of class App\Controller\ChartsController            
+         constructor expects Twig\Environment, mixed given.                     
+         🪪  argument.type                                                       
+  126    Parameter #2 $dividendService of class                                 
+         App\Controller\ChartsController constructor expects                    
+         App\Service\DividendService, mixed given.                              
+         🪪  argument.type                                                       
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ------------------------------------------- 
+  Line   config/routes.php                          
+ ------ ------------------------------------------- 
+  15     Cannot call method withStatus() on mixed.  
+         🪪  method.nonObject                        
+ ------ ------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   public/index.php                                                       
+ ------ ----------------------------------------------------------------------- 
+  12     Parameter #1 ...$definitions of method DI\ContainerBuilder<DI\Contain  
+         er>::addDefinitions() expects array|DI\Definition\Source\DefinitionSo  
+         urce|string, mixed given.                                              
+         🪪  argument.type                                                       
+  19     Parameter #1 $container of static method                               
+         Slim\Factory\AppFactory::setContainer() expects                        
+         Psr\Container\ContainerInterface, mixed given.                         
+         🪪  argument.type                                                       
+  19     Variable $container might not be defined.                              
+         🪪  variable.undefined                                                  
+  22     Trying to invoke mixed but it's not a callable.                        
+         🪪  callable.nonCallable                                                
+  23     Trying to invoke mixed but it's not a callable.                        
+         🪪  callable.nonCallable                                                
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Controller/AbstractController.php                                  
+ ------ ----------------------------------------------------------------------- 
+  9      Method App\Controller\AbstractController::baseVars() return type has   
+         no value type specified in iterable type array.                        
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Controller/AuthController.php                                      
+ ------ ----------------------------------------------------------------------- 
+  19     Method App\Controller\AuthController::loginPage() has parameter $args  
+         with no value type specified in iterable type array.                   
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  27     Method App\Controller\AuthController::login() has parameter $args      
+         with no value type specified in iterable type array.                   
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  30     Parameter #1 $string of function trim expects string, mixed given.     
+         🪪  argument.type                                                       
+  35     Parameter #1 $password of function password_verify expects string,     
+         mixed given.                                                           
+         🪪  argument.type                                                       
+  36     Parameter #1 $string of method                                         
+         Psr\Http\Message\StreamInterface::write() expects string,              
+         string|false given.                                                    
+         🪪  argument.type                                                       
+  41     Parameter #1 $string of method                                         
+         Psr\Http\Message\StreamInterface::write() expects string,              
+         string|false given.                                                    
+         🪪  argument.type                                                       
+  47     Method App\Controller\AuthController::logout() has parameter $args     
+         with no value type specified in iterable type array.                   
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  53     Parameter #1 $string of method                                         
+         Psr\Http\Message\StreamInterface::write() expects string,              
+         string|false given.                                                    
+         🪪  argument.type                                                       
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Controller/BlogController.php                                      
+ ------ ----------------------------------------------------------------------- 
+  22     Method App\Controller\BlogController::index() has parameter $args      
+         with no value type specified in iterable type array.                   
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  30     Method App\Controller\BlogController::show() has parameter $args with  
+         no value type specified in iterable type array.                        
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  32     Parameter #1 $slug of method App\Service\BlogService::getPost()        
+         expects string, mixed given.                                           
+         🪪  argument.type                                                       
+  44     Method App\Controller\BlogController::create() has parameter $args     
+         with no value type specified in iterable type array.                   
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  51     Cannot call method getId() on mixed.                                   
+         🪪  method.nonObject                                                    
+  51     Parameter #1 $userId of method App\Service\BlogService::createPost()   
+         expects int, mixed given.                                              
+         🪪  argument.type                                                       
+  52     Parameter #1 $string of function trim expects string, mixed given.     
+         🪪  argument.type                                                       
+  53     Parameter #1 $string of function trim expects string, mixed given.     
+         🪪  argument.type                                                       
+  54     Parameter #1 $string of function trim expects string, mixed given.     
+         🪪  argument.type                                                       
+  65     Method App\Controller\BlogController::edit() has parameter $args with  
+         no value type specified in iterable type array.                        
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  67     Parameter #1 $slug of method App\Service\BlogService::getPost()        
+         expects string, mixed given.                                           
+         🪪  argument.type                                                       
+  75     Parameter #1 $slug of method App\Service\BlogService::updatePost()     
+         expects string, mixed given.                                           
+         🪪  argument.type                                                       
+  76     Parameter #1 $string of function trim expects string, mixed given.     
+         🪪  argument.type                                                       
+  77     Parameter #1 $string of function trim expects string, mixed given.     
+         🪪  argument.type                                                       
+  78     Parameter #1 $string of function trim expects string, mixed given.     
+         🪪  argument.type                                                       
+  82     Binary operation "." between '/blog/' and mixed results in an error.   
+         🪪  binaryOp.invalid                                                    
+  90     Method App\Controller\BlogController::upload() has parameter $args     
+         with no value type specified in iterable type array.                   
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  94     Cannot call method getError() on mixed.                                
+         🪪  method.nonObject                                                    
+  95     Parameter #1 $string of method                                         
+         Psr\Http\Message\StreamInterface::write() expects string,              
+         string|false given.                                                    
+         🪪  argument.type                                                       
+  101    Cannot call method getClientFilename() on mixed.                       
+         🪪  method.nonObject                                                    
+  101    Parameter #1 $path of function pathinfo expects string, mixed given.   
+         🪪  argument.type                                                       
+  103    Cannot call method getClientMediaType() on mixed.                      
+         🪪  method.nonObject                                                    
+  104    Parameter #1 $string of method                                         
+         Psr\Http\Message\StreamInterface::write() expects string,              
+         string|false given.                                                    
+         🪪  argument.type                                                       
+  115    Cannot call method moveTo() on mixed.                                  
+         🪪  method.nonObject                                                    
+  117    Parameter #1 $string of method                                         
+         Psr\Http\Message\StreamInterface::write() expects string,              
+         string|false given.                                                    
+         🪪  argument.type                                                       
+  121    Method App\Controller\BlogController::delete() has parameter $args     
+         with no value type specified in iterable type array.                   
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  123    Parameter #1 $slug of method App\Service\BlogService::deletePost()     
+         expects string, mixed given.                                           
+         🪪  argument.type                                                       
+  124    Parameter #1 $string of method                                         
+         Psr\Http\Message\StreamInterface::write() expects string,              
+         string|false given.                                                    
+         🪪  argument.type                                                       
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Controller/ChartsController.php                                    
+ ------ ----------------------------------------------------------------------- 
+  17     Method App\Controller\ChartsController::index() has parameter $args    
+         with no value type specified in iterable type array.                   
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  25     Method App\Controller\ChartsController::growth() has parameter $args   
+         with no value type specified in iterable type array.                   
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  27     Parameter #1 $string of method                                         
+         Psr\Http\Message\StreamInterface::write() expects string,              
+         string|false given.                                                    
+         🪪  argument.type                                                       
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Controller/DashboardController.php                                 
+ ------ ----------------------------------------------------------------------- 
+  17     Method App\Controller\DashboardController::index() has parameter       
+         $args with no value type specified in iterable type array.             
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Controller/DividendController.php                                  
+ ------ ----------------------------------------------------------------------- 
+  17     Method App\Controller\DividendController::index() has parameter $args  
+         with no value type specified in iterable type array.                   
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  25     Method App\Controller\DividendController::portfolio() has parameter    
+         $args with no value type specified in iterable type array.             
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  27     Parameter #1 $string of method                                         
+         Psr\Http\Message\StreamInterface::write() expects string,              
+         string|false given.                                                    
+         🪪  argument.type                                                       
+  31     Method App\Controller\DividendController::addStock() has parameter     
+         $args with no value type specified in iterable type array.             
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  34     Parameter #3 $subject of function preg_replace expects array<float|in  
+         t|string>|string, mixed given.                                         
+         🪪  argument.type                                                       
+  35     Parameter #3 $subject of function preg_replace expects array<float|in  
+         t|string>|string, mixed given.                                         
+         🪪  argument.type                                                       
+  36     Cannot cast mixed to float.                                            
+         🪪  cast.double                                                         
+  37     Cannot cast mixed to float.                                            
+         🪪  cast.double                                                         
+  40     Parameter #1 $string of method                                         
+         Psr\Http\Message\StreamInterface::write() expects string,              
+         string|false given.                                                    
+         🪪  argument.type                                                       
+  45     Parameter #1 $string of method                                         
+         Psr\Http\Message\StreamInterface::write() expects string,              
+         string|false given.                                                    
+         🪪  argument.type                                                       
+  49     Method App\Controller\DividendController::deleteStock() has parameter  
+         $args with no value type specified in iterable type array.             
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  51     Parameter #3 $subject of function preg_replace expects array<float|in  
+         t|string>|string, mixed given.                                         
+         🪪  argument.type                                                       
+  59     Method App\Controller\DividendController::updateStock() has parameter  
+         $args with no value type specified in iterable type array.             
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  62     Parameter #3 $subject of function preg_replace expects array<float|in  
+         t|string>|string, mixed given.                                         
+         🪪  argument.type                                                       
+  63     Parameter #1 $string of function trim expects string, mixed given.     
+         🪪  argument.type                                                       
+  64     Parameter #1 $string of function trim expects string, mixed given.     
+         🪪  argument.type                                                       
+  74     Method App\Controller\DividendController::prices() has parameter       
+         $args with no value type specified in iterable type array.             
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  78     Parameter #2 $string of function explode expects string, mixed given.  
+         🪪  argument.type                                                       
+  79     Parameter #2 $callback of function array_filter expects                
+         (callable(string): bool)|null, Closure(mixed): (0|1|false) given.      
+         🪪  argument.type                                                       
+  82     Parameter #1 $string of method                                         
+         Psr\Http\Message\StreamInterface::write() expects string,              
+         string|false given.                                                    
+         🪪  argument.type                                                       
+  86     Method App\Controller\DividendController::upcoming() has parameter     
+         $args with no value type specified in iterable type array.             
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  88     Parameter #1 $string of method                                         
+         Psr\Http\Message\StreamInterface::write() expects string,              
+         string|false given.                                                    
+         🪪  argument.type                                                       
+  94     Method App\Controller\DividendController::addPayment() has parameter   
+         $args with no value type specified in iterable type array.             
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  97     Cannot cast mixed to int.                                              
+         🪪  cast.int                                                            
+  98     Parameter #1 $string of function trim expects string, mixed given.     
+         🪪  argument.type                                                       
+  99     Cannot cast mixed to int.                                              
+         🪪  cast.int                                                            
+  102    Parameter #1 $string of method                                         
+         Psr\Http\Message\StreamInterface::write() expects string,              
+         string|false given.                                                    
+         🪪  argument.type                                                       
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Controller/RipperController.php                                    
+ ------ ----------------------------------------------------------------------- 
+  17     Method App\Controller\RipperController::index() has parameter $args    
+         with no value type specified in iterable type array.                   
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  25     Method App\Controller\RipperController::rip() has parameter $args      
+         with no value type specified in iterable type array.                   
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  28     Parameter #1 $string of function trim expects string, mixed given.     
+         🪪  argument.type                                                       
+  31     Parameter #1 $string of method                                         
+         Psr\Http\Message\StreamInterface::write() expects string,              
+         string|false given.                                                    
+         🪪  argument.type                                                       
+  36     Parameter #1 $string of method                                         
+         Psr\Http\Message\StreamInterface::write() expects string,              
+         string|false given.                                                    
+         🪪  argument.type                                                       
+  40     Method App\Controller\RipperController::history() has parameter $args  
+         with no value type specified in iterable type array.                   
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  42     Parameter #1 $string of method                                         
+         Psr\Http\Message\StreamInterface::write() expects string,              
+         string|false given.                                                    
+         🪪  argument.type                                                       
+  46     Method App\Controller\RipperController::download() has parameter       
+         $args with no value type specified in iterable type array.             
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  49     Parameter #1 $videoId of method                                        
+         App\Service\RipperService::getDownloadPath() expects string, mixed     
+         given.                                                                 
+         🪪  argument.type                                                       
+  55     Binary operation "." between mixed and '.mp3' results in an error.     
+         🪪  binaryOp.invalid                                                    
+  63     Parameter #1 $stream of function feof expects resource,                
+         resource|false given.                                                  
+         🪪  argument.type                                                       
+  64     Parameter #1 $stream of function fread expects resource,               
+         resource|false given.                                                  
+         🪪  argument.type                                                       
+  64     Parameter #1 $string of method                                         
+         Psr\Http\Message\StreamInterface::write() expects string,              
+         string|false given.                                                    
+         🪪  argument.type                                                       
+  66     Parameter #1 $stream of function fclose expects resource,              
+         resource|false given.                                                  
+         🪪  argument.type                                                       
+  71     Method App\Controller\RipperController::stream() has parameter $args   
+         with no value type specified in iterable type array.                   
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  74     Parameter #1 $videoId of method                                        
+         App\Service\RipperService::getDownloadPath() expects string, mixed     
+         given.                                                                 
+         🪪  argument.type                                                       
+  86     Parameter #1 $stream of function feof expects resource,                
+         resource|false given.                                                  
+         🪪  argument.type                                                       
+  87     Parameter #1 $stream of function fread expects resource,               
+         resource|false given.                                                  
+         🪪  argument.type                                                       
+  87     Parameter #1 $string of method                                         
+         Psr\Http\Message\StreamInterface::write() expects string,              
+         string|false given.                                                    
+         🪪  argument.type                                                       
+  89     Parameter #1 $stream of function fclose expects resource,              
+         resource|false given.                                                  
+         🪪  argument.type                                                       
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Domain/BlogPost.php                                                
+ ------ ----------------------------------------------------------------------- 
+  31     Method App\Domain\BlogPost::getTagsArray() return type has no value    
+         type specified in iterable type array.                                 
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Domain/Stock.php                                                   
+ ------ ----------------------------------------------------------------------- 
+  27     Method App\Domain\Stock::toArray() return type has no value type       
+         specified in iterable type array.                                      
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Domain/StockQuote.php                                              
+ ------ ----------------------------------------------------------------------- 
+  10     Method App\Domain\StockQuote::__construct() has parameter $ohlc with   
+         no value type specified in iterable type array.                        
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  10     Method App\Domain\StockQuote::__construct() has parameter $timestamps  
+         with no value type specified in iterable type array.                   
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  23     Method App\Domain\StockQuote::toArray() return type has no value type  
+         specified in iterable type array.                                      
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+ ------ ----------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------- 
+  Line   src/Middleware/OptionalAuthMiddleware.php                            
+ ------ --------------------------------------------------------------------- 
+  27     Parameter #1 $token of method                                        
+         App\Service\AuthTokenService::validateToken() expects string, mixed  
+         given.                                                               
+         🪪  argument.type                                                     
+ ------ --------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------- 
+  Line   src/Middleware/TokenAuthMiddleware.php                               
+ ------ --------------------------------------------------------------------- 
+  28     Parameter #1 $token of method                                        
+         App\Service\AuthTokenService::validateToken() expects string, mixed  
+         given.                                                               
+         🪪  argument.type                                                     
+  44     Parameter #1 $string of method                                       
+         Psr\Http\Message\StreamInterface::write() expects string,            
+         string|false given.                                                  
+         🪪  argument.type                                                     
+ ------ --------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Repository/BlogRepository.php                                      
+ ------ ----------------------------------------------------------------------- 
+  13     Method App\Repository\BlogRepository::findPublished() return type has  
+         no value type specified in iterable type array.                        
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  18     Cannot call method fetchAll() on PDOStatement|false.                   
+         🪪  method.nonObject                                                    
+  18     Parameter #1 $callback of function array_map expects                   
+         (callable(mixed): mixed)|null, Closure(array): App\Domain\BlogPost     
+         given.                                                                 
+         🪪  argument.type                                                       
+         💡  Type #1 from the union: Type array<int|string, mixed> of parameter  
+          #1 $row of passed callable needs to be same or wider than parameter   
+         type mixed of accepting callable.                                      
+  21     Method App\Repository\BlogRepository::findAll() return type has no     
+         value type specified in iterable type array.                           
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  24     Cannot call method fetchAll() on PDOStatement|false.                   
+         🪪  method.nonObject                                                    
+  24     Parameter #1 $callback of function array_map expects                   
+         (callable(mixed): mixed)|null, Closure(array): App\Domain\BlogPost     
+         given.                                                                 
+         🪪  argument.type                                                       
+         💡  Type #1 from the union: Type array<int|string, mixed> of parameter  
+          #1 $row of passed callable needs to be same or wider than parameter   
+         type mixed of accepting callable.                                      
+  32     Parameter #1 $row of method App\Repository\BlogRepository::hydrate()   
+         expects array, mixed given.                                            
+         🪪  argument.type                                                       
+  55     Method App\Repository\BlogRepository::create() should return           
+         App\Domain\BlogPost but returns App\Domain\BlogPost|null.              
+         🪪  return.type                                                         
+  78     Method App\Repository\BlogRepository::hydrate() has parameter $row     
+         with no value type specified in iterable type array.                   
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  81     Cannot cast mixed to int.                                              
+         🪪  cast.int                                                            
+  82     Cannot cast mixed to int.                                              
+         🪪  cast.int                                                            
+  83     Parameter #3 $title of class App\Domain\BlogPost constructor expects   
+         string, mixed given.                                                   
+         🪪  argument.type                                                       
+  84     Parameter #4 $slug of class App\Domain\BlogPost constructor expects    
+         string, mixed given.                                                   
+         🪪  argument.type                                                       
+  85     Parameter #5 $content of class App\Domain\BlogPost constructor         
+         expects string, mixed given.                                           
+         🪪  argument.type                                                       
+  86     Parameter #6 $tags of class App\Domain\BlogPost constructor expects    
+         string|null, mixed given.                                              
+         🪪  argument.type                                                       
+  88     Parameter #1 $datetime of class DateTimeImmutable constructor expects  
+         string, mixed given.                                                   
+         🪪  argument.type                                                       
+  89     Parameter #1 $datetime of class DateTimeImmutable constructor expects  
+         string, mixed given.                                                   
+         🪪  argument.type                                                       
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Repository/DividendRepository.php                                  
+ ------ ----------------------------------------------------------------------- 
+  27     Parameter #1 $callback of function array_map expects                   
+         (callable(mixed): mixed)|null, Closure(array): App\Domain\Stock        
+         given.                                                                 
+         🪪  argument.type                                                       
+         💡  Type #1 from the union: Type array<int|string, mixed> of parameter  
+          #1 $row of passed callable needs to be same or wider than parameter   
+         type mixed of accepting callable.                                      
+  38     Binary operation "+" between mixed and array{total_dividend_payments:  
+         0} results in an error.                                                
+         🪪  binaryOp.invalid                                                    
+  100    Cannot access offset 'last-checked' on mixed.                          
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  100    Cannot cast mixed to int.                                              
+         🪪  cast.int                                                            
+  132    Method                                                                 
+         App\Repository\DividendRepository::getSnapshottedSymbolsForDate()      
+         should return array<string> but returns list.                          
+         🪪  return.type                                                         
+  159    Method App\Repository\DividendRepository::getGrowthHistory() return    
+         type has no value type specified in iterable type array.               
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  166    Cannot cast mixed to float.                                            
+         🪪  cast.double                                                         
+  166    Parameter #1 $callback of function array_map expects                   
+         (callable(mixed): mixed)|null, Closure(array): array{date: mixed,      
+         value: float} given.                                                   
+         🪪  argument.type                                                       
+         💡  Type #1 from the union: Type array<int|string, mixed> of parameter  
+          #1 $row of passed callable needs to be same or wider than parameter   
+         type mixed of accepting callable.                                      
+  171    Method App\Repository\DividendRepository::hydrateStock() has           
+         parameter $row with no value type specified in iterable type array.    
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  174    Cannot cast mixed to int.                                              
+         🪪  cast.int                                                            
+  175    Parameter #2 $symbol of class App\Domain\Stock constructor expects     
+         string, mixed given.                                                   
+         🪪  argument.type                                                       
+  176    Parameter #3 $name of class App\Domain\Stock constructor expects       
+         string, mixed given.                                                   
+         🪪  argument.type                                                       
+  177    Cannot cast mixed to float.                                            
+         🪪  cast.double                                                         
+  178    Cannot cast mixed to float.                                            
+         🪪  cast.double                                                         
+  179    Parameter #6 $exDiv of class App\Domain\Stock constructor expects      
+         string|null, mixed given.                                              
+         🪪  argument.type                                                       
+  180    Parameter #7 $dividend of class App\Domain\Stock constructor expects   
+         string|null, mixed given.                                              
+         🪪  argument.type                                                       
+  181    Cannot cast mixed to float.                                            
+         🪪  cast.double                                                         
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Repository/RipperRepository.php                                    
+ ------ ----------------------------------------------------------------------- 
+  18     Parameter #1 $row of method                                            
+         App\Repository\RipperRepository::hydrate() expects array, mixed        
+         given.                                                                 
+         🪪  argument.type                                                       
+  26     Parameter #1 $row of method                                            
+         App\Repository\RipperRepository::hydrate() expects array, mixed        
+         given.                                                                 
+         🪪  argument.type                                                       
+  29     Method App\Repository\RipperRepository::findAll() return type has no   
+         value type specified in iterable type array.                           
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  32     Cannot call method fetchAll() on PDOStatement|false.                   
+         🪪  method.nonObject                                                    
+  32     Parameter #1 $callback of function array_map expects                   
+         (callable(mixed): mixed)|null, Closure(array): App\Domain\RippedFile   
+         given.                                                                 
+         🪪  argument.type                                                       
+         💡  Type #1 from the union: Type array<int|string, mixed> of parameter  
+          #1 $row of passed callable needs to be same or wider than parameter   
+         type mixed of accepting callable.                                      
+  61     Method App\Repository\RipperRepository::hydrate() has parameter $row   
+         with no value type specified in iterable type array.                   
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  64     Cannot cast mixed to int.                                              
+         🪪  cast.int                                                            
+  65     Parameter #2 $url of class App\Domain\RippedFile constructor expects   
+         string, mixed given.                                                   
+         🪪  argument.type                                                       
+  66     Parameter #3 $videoId of class App\Domain\RippedFile constructor       
+         expects string, mixed given.                                           
+         🪪  argument.type                                                       
+  67     Parameter #4 $title of class App\Domain\RippedFile constructor         
+         expects string|null, mixed given.                                      
+         🪪  argument.type                                                       
+  68     Parameter #5 $thumbnail of class App\Domain\RippedFile constructor     
+         expects string|null, mixed given.                                      
+         🪪  argument.type                                                       
+  69     Parameter #6 $path of class App\Domain\RippedFile constructor expects  
+         string|null, mixed given.                                              
+         🪪  argument.type                                                       
+  70     Parameter #1 $datetime of class DateTimeImmutable constructor expects  
+         string, mixed given.                                                   
+         🪪  argument.type                                                       
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Repository/UserRepository.php                                      
+ ------ ----------------------------------------------------------------------- 
+  18     Parameter #1 $row of method App\Repository\UserRepository::hydrate()   
+         expects array, mixed given.                                            
+         🪪  argument.type                                                       
+  26     Parameter #1 $row of method App\Repository\UserRepository::hydrate()   
+         expects array, mixed given.                                            
+         🪪  argument.type                                                       
+  29     Method App\Repository\UserRepository::hydrate() has parameter $row     
+         with no value type specified in iterable type array.                   
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  32     Cannot cast mixed to int.                                              
+         🪪  cast.int                                                            
+  33     Parameter #2 $username of class App\Domain\User constructor expects    
+         string, mixed given.                                                   
+         🪪  argument.type                                                       
+  34     Parameter #3 $passwordHash of class App\Domain\User constructor        
+         expects string, mixed given.                                           
+         🪪  argument.type                                                       
+  35     Parameter #1 $datetime of class DateTimeImmutable constructor expects  
+         string, mixed given.                                                   
+         🪪  argument.type                                                       
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ------------------------------------------ 
+  Line   src/Service/AuthTokenService.php          
+ ------ ------------------------------------------ 
+  35     Cannot access offset 'user_id' on mixed.  
+         🪪  offsetAccess.nonOffsetAccessible       
+  35     Cannot cast mixed to int.                 
+         🪪  cast.int                               
+ ------ ------------------------------------------ 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Service/BlogService.php                                            
+ ------ ----------------------------------------------------------------------- 
+  12     Method App\Service\BlogService::getPublishedPosts() return type has    
+         no value type specified in iterable type array.                        
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  17     Method App\Service\BlogService::getAllPosts() return type has no       
+         value type specified in iterable type array.                           
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  57     Parameter #1 $string of function trim expects string, string|null      
+         given.                                                                 
+         🪪  argument.type                                                       
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Service/DividendCalendarInterface.php                              
+ ------ ----------------------------------------------------------------------- 
+  13     Method App\Service\DividendCalendarInterface::getDeclaredDividends()   
+         return type has no value type specified in iterable type array.        
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Service/DividendService.php                                        
+ ------ ----------------------------------------------------------------------- 
+  18     Method App\Service\DividendService::getPortfolio() return type has no  
+         value type specified in iterable type array.                           
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  23     Method App\Service\DividendService::addStock() return type has no      
+         value type specified in iterable type array.                           
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  54     Method App\Service\DividendService::getPrices() has parameter          
+         $symbols with no value type specified in iterable type array.          
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  54     Method App\Service\DividendService::getPrices() return type has no     
+         value type specified in iterable type array.                           
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  59     Parameter #1 $symbol of method                                         
+         App\Service\YahooFinanceService::getSymbolQuote() expects string,      
+         mixed given.                                                           
+         🪪  argument.type                                                       
+  94     Method App\Service\DividendService::getPortfolioGrowth() return type   
+         has no value type specified in iterable type array.                    
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  100    Method App\Service\DividendService::freetradeSymbols() return type     
+         has no value type specified in iterable type array.                    
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  103    Parameter #2 $string of function explode expects string, string|false  
+         given.                                                                 
+         🪪  argument.type                                                       
+  115    Method App\Service\DividendService::getUpcomingDividends() return      
+         type has no value type specified in iterable type array.               
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  118    Parameter #1 $array of function array_flip expects array<int|string>,  
+          array given.                                                          
+         🪪  argument.type                                                       
+  123    Possibly invalid array key type mixed.                                 
+         🪪  offsetAccess.invalidOffset                                          
+  139    Binary operation "-" between mixed and mixed results in an error.      
+         🪪  binaryOp.invalid                                                    
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Service/RipperService.php                                          
+ ------ ----------------------------------------------------------------------- 
+  17     Method App\Service\RipperService::rip() return type has no value type  
+         specified in iterable type array.                                      
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  63     Parameter #1 $json of function json_decode expects string,             
+         string|false given.                                                    
+         🪪  argument.type                                                       
+  64     Cannot access offset 'id' on mixed.                                    
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  64     Cannot access offset 'title' on mixed.                                 
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  65     Parameter #1 $videoId of method                                        
+         App\Repository\RipperRepository::updateTitle() expects string, mixed   
+         given.                                                                 
+         🪪  argument.type                                                       
+  65     Parameter #2 $title of method                                          
+         App\Repository\RipperRepository::updateTitle() expects string, mixed   
+         given.                                                                 
+         🪪  argument.type                                                       
+  90     Method App\Service\RipperService::getHistory() return type has no      
+         value type specified in iterable type array.                           
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  94     Cannot call method getVideoId() on mixed.                              
+         🪪  method.nonObject                                                    
+  95     Cannot call method getTitle() on mixed.                                
+         🪪  method.nonObject                                                    
+  96     Cannot call method getThumbnail() on mixed.                            
+         🪪  method.nonObject                                                    
+  97     Cannot call method isReady() on mixed.                                 
+         🪪  method.nonObject                                                    
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Service/SnowballAnalyticsService.php                               
+ ------ ----------------------------------------------------------------------- 
+  22     Method App\Service\SnowballAnalyticsService::getDeclaredDividends()    
+         return type has no value type specified in iterable type array.        
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  27     Method App\Service\SnowballAnalyticsService::getDeclaredDividends()    
+         should return array<array> but returns mixed.                          
+         🪪  return.type                                                         
+  27     Parameter #1 $json of function json_decode expects string,             
+         string|false given.                                                    
+         🪪  argument.type                                                       
+  64     Parameter #1 $json of function json_decode expects string,             
+         string|true given.                                                     
+         🪪  argument.type                                                       
+  65     Cannot access offset 'data' on mixed.                                  
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  66     Cannot access offset 'totalCount' on mixed.                            
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  66     Cannot cast mixed to int.                                              
+         🪪  cast.int                                                            
+  67     Cannot access offset 'pageSize' on mixed.                              
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  67     Cannot cast mixed to int.                                              
+         🪪  cast.int                                                            
+  70     Argument of an invalid type mixed supplied for foreach, only           
+         iterables are supported.                                               
+         🪪  foreach.nonIterable                                                 
+  71     Cannot access offset 'status' on mixed.                                
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  75     Cannot access offset 'ticker' on mixed.                                
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  76     Cannot access offset 'exDividendDate' on mixed.                        
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  77     Parameter #1 $datetime of function strtotime expects string, mixed     
+         given.                                                                 
+         🪪  argument.type                                                       
+  84     Cannot access offset 'companyName' on mixed.                           
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  84     Cannot access offset 'name' on mixed.                                  
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  86     Cannot access offset 'perShare' on mixed.                              
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  87     Cannot access offset 'currency' on mixed.                              
+         🪪  offsetAccess.nonOffsetAccessible                                    
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Service/YahooFinanceService.php                                    
+ ------ ----------------------------------------------------------------------- 
+  31     Method App\Service\YahooFinanceService::parseHttpStatus() has          
+         parameter $responseHeaders with no value type specified in iterable    
+         type array.                                                            
+         🪪  missingType.iterableValue                                           
+         💡  See:                                                                
+         https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-i  
+         terable-type                                                           
+  33     Parameter #2 $subject of function preg_match expects string, mixed     
+         given.                                                                 
+         🪪  argument.type                                                       
+  74     Variable $http_response_header on left side of ?? always exists and    
+         is not nullable.                                                       
+         🪪  nullCoalesce.variable                                               
+  103    Parameter #1 $json of function json_decode expects string,             
+         string|false given.                                                    
+         🪪  argument.type                                                       
+  104    Cannot access offset 'chart' on mixed.                                 
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  104    Cannot access offset 'result' on mixed.                                
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  104    Cannot access offset 0 on mixed.                                       
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  111    Cannot access offset 'meta' on mixed.                                  
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  112    Cannot access offset 'indicators' on mixed.                            
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  112    Cannot access offset 'quote' on mixed.                                 
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  112    Cannot access offset 0 on mixed.                                       
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  113    Cannot access offset 'timestamp' on mixed.                             
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  116    Argument of an invalid type mixed supplied for foreach, only           
+         iterables are supported.                                               
+         🪪  foreach.nonIterable                                                 
+  118    Cannot access offset 'open' on mixed.                                  
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  118    Cannot access offset mixed on mixed.                                   
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  118    Cannot cast mixed to float.                                            
+         🪪  cast.double                                                         
+  119    Cannot access offset 'high' on mixed.                                  
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  119    Cannot access offset mixed on mixed.                                   
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  119    Cannot cast mixed to float.                                            
+         🪪  cast.double                                                         
+  120    Cannot access offset 'low' on mixed.                                   
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  120    Cannot access offset mixed on mixed.                                   
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  120    Cannot cast mixed to float.                                            
+         🪪  cast.double                                                         
+  121    Cannot access offset 'close' on mixed.                                 
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  121    Cannot access offset mixed on mixed.                                   
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  121    Cannot cast mixed to float.                                            
+         🪪  cast.double                                                         
+  127    Cannot access offset 'regularMarketPrice' on mixed.                    
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  127    Cannot cast mixed to float.                                            
+         🪪  cast.double                                                         
+  128    Cannot access offset 'regularMarketTime' on mixed.                     
+         🪪  offsetAccess.nonOffsetAccessible                                    
+  128    Cannot cast mixed to int.                                              
+         🪪  cast.int                                                            
+  130    Parameter #5 $timestamps of class App\Domain\StockQuote constructor    
+         expects array, mixed given.                                            
+         🪪  argument.type                                                       
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   tests/Service/ExDividendDateRegexTest.php                              
+ ------ ----------------------------------------------------------------------- 
+  81     Call to method PHPUnit\Framework\Assert::assertFalse() with false      
+         will always evaluate to false.                                         
+         🪪  method.impossibleType                                               
+         💡  Because the type is coming from a PHPDoc, you can turn off this     
+         check by setting treatPhpDocTypesAsCertain: false in your phpstan.neo  
+         n.                                                                     
+ ------ ----------------------------------------------------------------------- 
+
+ [ERROR] Found 268 errors                                                       
+

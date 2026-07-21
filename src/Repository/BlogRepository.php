@@ -5,23 +5,38 @@ namespace App\Repository;
 use App\Domain\BlogPost;
 use DateTimeImmutable;
 use PDO;
+use RuntimeException;
 
 class BlogRepository
 {
     public function __construct(private PDO $db) {}
 
+    /**
+     * @return list<BlogPost>
+     */
     public function findPublished(): array
     {
         $stmt = $this->db->query(
             'SELECT * FROM blog_posts WHERE published = 1 ORDER BY created_at DESC'
         );
-        return array_map($this->hydrate(...), $stmt->fetchAll());
+        if ($stmt === false) {
+            throw new RuntimeException('Failed to query blog_posts');
+        }
+
+        return $this->hydrateAll($stmt);
     }
 
+    /**
+     * @return list<BlogPost>
+     */
     public function findAll(): array
     {
         $stmt = $this->db->query('SELECT * FROM blog_posts ORDER BY created_at DESC');
-        return array_map($this->hydrate(...), $stmt->fetchAll());
+        if ($stmt === false) {
+            throw new RuntimeException('Failed to query blog_posts');
+        }
+
+        return $this->hydrateAll($stmt);
     }
 
     public function findBySlug(string $slug): ?BlogPost
@@ -29,7 +44,10 @@ class BlogRepository
         $stmt = $this->db->prepare('SELECT * FROM blog_posts WHERE slug = ? LIMIT 1');
         $stmt->execute([$slug]);
         $row = $stmt->fetch();
-        return $row ? $this->hydrate($row) : null;
+        if (!is_array($row)) {
+            return null;
+        }
+        return $this->hydrate($row);
     }
 
     public function slugExists(string $slug, ?int $excludeId = null): bool
@@ -52,7 +70,11 @@ class BlogRepository
         );
         $stmt->execute([$userId, $title, $slug, $content, $tags, (int) $published]);
         $id = (int) $this->db->lastInsertId();
-        return $this->findBySlug($slug);
+        $post = $this->findBySlug($slug);
+        if ($post === null) {
+            throw new RuntimeException('Failed to load blog post after insert');
+        }
+        return $post;
     }
 
     public function update(int $id, string $title, string $slug, string $content, ?string $tags, bool $published): void
@@ -75,18 +97,61 @@ class BlogRepository
         $stmt->execute([$id]);
     }
 
+    /**
+     * @return list<BlogPost>
+     */
+    private function hydrateAll(\PDOStatement $stmt): array
+    {
+        $rows = $stmt->fetchAll();
+
+        $posts = [];
+        foreach ($rows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $posts[] = $this->hydrate($row);
+        }
+
+        return $posts;
+    }
+
+    /**
+     * @param array<array-key, mixed> $row
+     */
     private function hydrate(array $row): BlogPost
     {
+        $id = $row['id'];
+        $userId = $row['user_id'];
+        $title = $row['title'];
+        $slug = $row['slug'];
+        $content = $row['content'];
+        $tags = $row['tags'];
+        $createdAt = $row['created_at'];
+        $updatedAt = $row['updated_at'];
+
+        if (!is_numeric($id) || !is_numeric($userId)) {
+            throw new RuntimeException('Unexpected non-numeric id/user_id in blog_posts row');
+        }
+        if (!is_string($title) || !is_string($slug) || !is_string($content)) {
+            throw new RuntimeException('Unexpected non-string title/slug/content in blog_posts row');
+        }
+        if ($tags !== null && !is_string($tags)) {
+            throw new RuntimeException('Unexpected non-string tags in blog_posts row');
+        }
+        if (!is_string($createdAt) || !is_string($updatedAt)) {
+            throw new RuntimeException('Unexpected non-string created_at/updated_at in blog_posts row');
+        }
+
         return new BlogPost(
-            (int) $row['id'],
-            (int) $row['user_id'],
-            $row['title'],
-            $row['slug'],
-            $row['content'],
-            $row['tags'],
+            (int) $id,
+            (int) $userId,
+            $title,
+            $slug,
+            $content,
+            $tags,
             (bool) $row['published'],
-            new DateTimeImmutable($row['created_at']),
-            new DateTimeImmutable($row['updated_at']),
+            new DateTimeImmutable($createdAt),
+            new DateTimeImmutable($updatedAt),
         );
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Domain\RippedFile;
 use App\Repository\RipperRepository;
 
 class RipperService
@@ -14,6 +15,9 @@ class RipperService
         private string $thumbnailDir,
     ) {}
 
+    /**
+     * @return array{status: string, message: string}
+     */
     public function rip(string $url): array
     {
         $existing = $this->repo->findByUrl($url);
@@ -60,8 +64,14 @@ class RipperService
                 $this->repo->updateThumbnail($id, '/assets/ripper/thumbnails/' . $file);
 
             } elseif ($ext === 'json') {
-                $data = json_decode(file_get_contents($this->downloadDir . $file), true);
-                if (isset($data['id'], $data['title'])) {
+                $contents = file_get_contents($this->downloadDir . $file);
+                $data = $contents !== false ? json_decode($contents, true) : null;
+                if (
+                    is_array($data)
+                    && isset($data['id'], $data['title'])
+                    && is_string($data['id'])
+                    && is_string($data['title'])
+                ) {
                     $this->repo->updateTitle($data['id'], $data['title']);
                     unlink($this->downloadDir . $file);
                 }
@@ -87,10 +97,13 @@ class RipperService
         }
     }
 
+    /**
+     * @return array<array{video_id: string, title: ?string, thumbnail: ?string, ready: bool}>
+     */
     public function getHistory(): array
     {
         $this->cleanup();
-        return array_map(fn($f) => [
+        return array_map(fn(RippedFile $f) => [
             'video_id'  => $f->getVideoId(),
             'title'     => $f->getTitle(),
             'thumbnail' => $f->getThumbnail(),

@@ -6,6 +6,9 @@ use DateTimeImmutable;
 
 abstract class AbstractController
 {
+    /**
+     * @return array<string, int>
+     */
     protected function baseVars(): array
     {
         $now = new DateTimeImmutable('today');

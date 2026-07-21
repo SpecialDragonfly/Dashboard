@@ -31,8 +31,12 @@ class AuthTokenService
             'SELECT user_id FROM auth_tokens WHERE token = ? AND expires_at > ?'
         );
         $stmt->execute([$token, (new DateTimeImmutable())->format('Y-m-d H:i:s')]);
-        $row = $stmt->fetch();
-        return $row ? (int) $row['user_id'] : null;
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!is_array($row) || !isset($row['user_id']) || !is_numeric($row['user_id'])) {
+            return null;
+        }
+
+        return (int) $row['user_id'];
     }
 
     public function revokeToken(string $token): void

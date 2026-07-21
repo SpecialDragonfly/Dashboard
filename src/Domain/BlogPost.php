@@ -28,6 +28,9 @@ class BlogPost
     public function getCreatedAt(): DateTimeImmutable { return $this->createdAt; }
     public function getUpdatedAt(): DateTimeImmutable { return $this->updatedAt; }
 
+    /**
+     * @return list<string>
+     */
     public function getTagsArray(): array
     {
         if ($this->tags === null || $this->tags === '') {

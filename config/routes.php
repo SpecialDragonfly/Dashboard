@@ -8,11 +8,13 @@ use App\Controller\DividendController;
 use App\Controller\RipperController;
 use App\Middleware\OptionalAuthMiddleware;
 use App\Middleware\TokenAuthMiddleware;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
 
 return function (App $app) {
     // -- Housekeeping --
-    $app->get('/favicon.ico', function ($req, $res) { return $res->withStatus(204); });
+    $app->get('/favicon.ico', function (Request $req, Response $res) { return $res->withStatus(204); });
 
     // -- Public --
     $app->get('/', [DashboardController::class, 'index'])->add(OptionalAuthMiddleware::class);

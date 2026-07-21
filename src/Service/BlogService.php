@@ -9,11 +9,17 @@ class BlogService
 {
     public function __construct(private BlogRepository $repo) {}
 
+    /**
+     * @return BlogPost[]
+     */
     public function getPublishedPosts(): array
     {
         return $this->repo->findPublished();
     }
 
+    /**
+     * @return BlogPost[]
+     */
     public function getAllPosts(): array
     {
         return $this->repo->findAll();
@@ -54,7 +60,8 @@ class BlogService
 
     private function generateSlug(string $title, ?int $excludeId = null): string
     {
-        $base = strtolower(trim(preg_replace('/[^a-z0-9]+/i', '-', $title), '-'));
+        $slugified = preg_replace('/[^a-z0-9]+/i', '-', $title) ?? $title;
+        $base = strtolower(trim($slugified, '-'));
         $slug = $base;
         $n = 2;
         while ($this->repo->slugExists($slug, $excludeId)) {

@@ -5,7 +5,8 @@ namespace App\Domain;
 class StockQuote
 {
     /**
-     * @param array $ohlc  Each entry: [open, high, low, close] (floats, in pence)
+     * @param list<int> $timestamps Unix timestamps (seconds) per candle
+     * @param list<array{0: float, 1: float, 2: float, 3: float}> $ohlc Each entry: [open, high, low, close] (floats, in pence)
      */
     public function __construct(
         private string $symbol,
@@ -20,6 +21,16 @@ class StockQuote
     public function getPriceTime(): int { return $this->priceTime; }
     public function getLastChecked(): int { return $this->lastChecked; }
 
+    /**
+     * @return array{
+     *     symbol: string,
+     *     price: float,
+     *     priceTime: int,
+     *     lastChecked: int,
+     *     timestamps: list<int>,
+     *     ohlc: list<array{0: float, 1: float, 2: float, 3: float}>,
+     * }
+     */
     public function toArray(): array
     {
         return [

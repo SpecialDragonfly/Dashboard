@@ -14,6 +14,9 @@ class DividendController extends AbstractController
         private DividendService $dividendService,
     ) {}
 
+    /**
+     * @param array<string, mixed> $args
+     */
     public function index(Request $request, Response $response, array $args): Response
     {
         $response->getBody()->write(
@@ -22,33 +25,63 @@ class DividendController extends AbstractController
         return $response;
     }
 
+    /**
+     * @param array<string, mixed> $args
+     */
     public function portfolio(Request $request, Response $response, array $args): Response
     {
-        $response->getBody()->write(json_encode($this->dividendService->getPortfolio()));
+        $response->getBody()->write(json_encode($this->dividendService->getPortfolio(), JSON_THROW_ON_ERROR));
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    /**
+     * @param array<string, mixed> $args
+     */
     public function addStock(Request $request, Response $response, array $args): Response
     {
-        $body = (array) $request->getParsedBody();
-        $symbol = strtoupper(preg_replace('/[^A-Za-z0-9.\-_]/', '', $body['symbol'] ?? ''));
-        $name = preg_replace('/[^A-Za-z0-9 &\'().,\-_]/', '', $body['name'] ?? '');
-        $qty     = (float) ($body['quantity'] ?? 0);
-        $price   = (float) ($body['price']    ?? 0);
+        $parsedBody = $request->getParsedBody();
+        $body = is_array($parsedBody) ? $parsedBody : [];
+
+        $symbol = '';
+        if (isset($body['symbol']) && is_string($body['symbol'])) {
+            $symbol = strtoupper(preg_replace('/[^A-Za-z0-9.\-_]/', '', $body['symbol']) ?? '');
+        }
+
+        $name = '';
+        if (isset($body['name']) && is_string($body['name'])) {
+            $name = preg_replace('/[^A-Za-z0-9 &\'().,\-_]/', '', $body['name']) ?? '';
+        }
+
+        $qty = 0.0;
+        if (isset($body['quantity']) && is_scalar($body['quantity'])) {
+            $qty = (float) $body['quantity'];
+        }
+
+        $price = 0.0;
+        if (isset($body['price']) && is_scalar($body['price'])) {
+            $price = (float) $body['price'];
+        }
 
         if ($symbol === '' || $name === '' || $qty <= 0 || $price <= 0) {
-            $response->getBody()->write(json_encode(['error' => 'Invalid input']));
+            $response->getBody()->write(json_encode(['error' => 'Invalid input'], JSON_THROW_ON_ERROR));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
         $result = $this->dividendService->addStock($symbol, $name, $qty, $price);
-        $response->getBody()->write(json_encode($result));
+        $response->getBody()->write(json_encode($result, JSON_THROW_ON_ERROR));
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    /**
+     * @param array<string, mixed> $args
+     */
     public function deleteStock(Request $request, Response $response, array $args): Response
     {
-        $symbol = preg_replace('/[^A-Za-z0-9.\-_]/', '', $args['symbol'] ?? '');
+        $symbolArg = $args['symbol'] ?? '';
+        $symbol = '';
+        if (is_string($symbolArg)) {
+            $symbol = preg_replace('/[^A-Za-z0-9.\-_]/', '', $symbolArg) ?? '';
+        }
         if ($symbol === '') {
             return $response->withStatus(400);
         }
@@ -56,12 +89,28 @@ class DividendController extends AbstractController
         return $response->withStatus(204);
     }
 
+    /**
+     * @param array<string, mixed> $args
+     */
     public function updateStock(Request $request, Response $response, array $args): Response
     {
-        $body     = (array) $request->getParsedBody();
-        $symbol   = preg_replace('/[^A-Za-z0-9.\-_]/', '', $body['symbol']   ?? '');
-        $exDiv    = trim($body['exDiv']    ?? '');
-        $dividend = trim($body['dividend'] ?? '');
+        $parsedBody = $request->getParsedBody();
+        $body = is_array($parsedBody) ? $parsedBody : [];
+
+        $symbol = '';
+        if (isset($body['symbol']) && is_string($body['symbol'])) {
+            $symbol = preg_replace('/[^A-Za-z0-9.\-_]/', '', $body['symbol']) ?? '';
+        }
+
+        $exDiv = '';
+        if (isset($body['exDiv']) && is_string($body['exDiv'])) {
+            $exDiv = trim($body['exDiv']);
+        }
+
+        $dividend = '';
+        if (isset($body['dividend']) && is_string($body['dividend'])) {
+            $dividend = trim($body['dividend']);
+        }
 
         if ($symbol === '') {
             return $response->withStatus(400);
@@ -71,35 +120,60 @@ class DividendController extends AbstractController
         return $response->withStatus(204);
     }
 
+    /**
+     * @param array<string, mixed> $args
+     */
     public function prices(Request $request, Response $response, array $args): Response
     {
-        $raw     = $request->getQueryParams()['symbols'] ?? '';
+        $rawSymbols = $request->getQueryParams()['symbols'] ?? '';
+        $raw = is_string($rawSymbols) ? $rawSymbols : '';
+
         $symbols = array_values(array_filter(
             array_map('trim', explode(',', $raw)),
-            fn($s) => preg_match('/^[A-Za-z0-9.\-_]+$/', $s)
+            static fn(string $s): bool => preg_match('/^[A-Za-z0-9.\-_]+$/', $s) === 1
         ));
 
-        $response->getBody()->write(json_encode($this->dividendService->getPrices($symbols)));
+        $response->getBody()->write(json_encode($this->dividendService->getPrices($symbols), JSON_THROW_ON_ERROR));
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    /**
+     * @param array<string, mixed> $args
+     */
     public function upcoming(Request $request, Response $response, array $args): Response
     {
         $response->getBody()->write(json_encode(
-            $this->dividendService->getUpcomingDividends()
+            $this->dividendService->getUpcomingDividends(),
+            JSON_THROW_ON_ERROR
         ));
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    /**
+     * @param array<string, mixed> $args
+     */
     public function addPayment(Request $request, Response $response, array $args): Response
     {
-        $body     = (array) $request->getParsedBody();
-        $symbolId = (int) ($body['symbolId'] ?? 0);
-        $date     = trim($body['date']   ?? '');
-        $amount   = (int) ($body['amount'] ?? 0);
+        $parsedBody = $request->getParsedBody();
+        $body = is_array($parsedBody) ? $parsedBody : [];
+
+        $symbolId = 0;
+        if (isset($body['symbolId']) && is_scalar($body['symbolId'])) {
+            $symbolId = (int) $body['symbolId'];
+        }
+
+        $date = '';
+        if (isset($body['date']) && is_string($body['date'])) {
+            $date = trim($body['date']);
+        }
+
+        $amount = 0;
+        if (isset($body['amount']) && is_scalar($body['amount'])) {
+            $amount = (int) $body['amount'];
+        }
 
         if ($symbolId <= 0 || $date === '' || $amount <= 0) {
-            $response->getBody()->write(json_encode(['error' => 'Invalid input']));
+            $response->getBody()->write(json_encode(['error' => 'Invalid input'], JSON_THROW_ON_ERROR));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 

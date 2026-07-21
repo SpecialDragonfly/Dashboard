@@ -24,7 +24,15 @@ ORDER BY p.symbol ASC
 SQL;
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
-        return array_map($this->hydrateStock(...), $stmt->fetchAll());
+
+        $stocks = [];
+        foreach ($stmt->fetchAll() as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $stocks[] = $this->hydrateStock($row);
+        }
+        return $stocks;
     }
 
     public function findBySymbol(string $symbol): ?Stock
@@ -35,7 +43,10 @@ SQL;
         $stmt->bindValue(':symbol', $symbol);
         $stmt->execute();
         $row = $stmt->fetch();
-        return $row ? $this->hydrateStock($row + ['total_dividend_payments' => 0]) : null;
+        if (!is_array($row)) {
+            return null;
+        }
+        return $this->hydrateStock($row + ['total_dividend_payments' => 0]);
     }
 
     public function insertStock(string $symbol, string $name, float $quantity, float $price): Stock
@@ -97,7 +108,10 @@ SQL;
         $stmt->bindValue(':ticker', $ticker);
         $stmt->execute();
         $row = $stmt->fetch();
-        return $row ? (int) $row['last-checked'] : 0;
+        if (!is_array($row)) {
+            return 0;
+        }
+        return $this->toInt($row['last-checked']);
     }
 
     public function upsertSymbolLastChecked(string $ticker, int $time): void
@@ -129,7 +143,18 @@ SQL;
         $stmt = $this->db->prepare('SELECT symbol FROM portfolio_value_history WHERE date = :date');
         $stmt->bindValue(':date', $date);
         $stmt->execute();
-        return array_column($stmt->fetchAll(), 'symbol');
+
+        $symbols = [];
+        foreach ($stmt->fetchAll() as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $symbol = $row['symbol'];
+            if (is_string($symbol)) {
+                $symbols[] = $symbol;
+            }
+        }
+        return $symbols;
     }
 
     public function insertValueSnapshot(string $date, string $symbol, float $quantity, float $marketPrice): void
@@ -155,30 +180,74 @@ SQL;
         }
     }
 
-    /** @return array[] Each entry: ['date' => string, 'value' => float] */
+    /** @return list<array{date: string, value: float}> */
     public function getGrowthHistory(): array
     {
         $stmt = $this->db->prepare(
             'SELECT date, SUM(value) AS value FROM portfolio_value_history GROUP BY date ORDER BY date ASC'
         );
         $stmt->execute();
-        return array_map(
-            fn(array $row) => ['date' => $row['date'], 'value' => (float) $row['value']],
-            $stmt->fetchAll(),
-        );
+
+        $history = [];
+        foreach ($stmt->fetchAll() as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $history[] = [
+                'date' => $this->toString($row['date']),
+                'value' => $this->toFloat($row['value']),
+            ];
+        }
+        return $history;
     }
 
+    /** @param array<mixed, mixed> $row */
     private function hydrateStock(array $row): Stock
     {
         return new Stock(
-            (int) $row['id'],
-            $row['symbol'],
-            $row['name'],
-            (float) $row['quantity'],
-            (float) $row['price'],
-            $row['ex-div'] ?? null,
-            $row['dividend'] ?? null,
-            (float) ($row['total_dividend_payments'] ?? 0),
+            $this->toInt($row['id']),
+            $this->toString($row['symbol']),
+            $this->toString($row['name']),
+            $this->toFloat($row['quantity']),
+            $this->toFloat($row['price']),
+            $this->toNullableString($row['ex-div'] ?? null),
+            $this->toNullableString($row['dividend'] ?? null),
+            $this->toFloat($row['total_dividend_payments'] ?? 0),
         );
+    }
+
+    private function toInt(mixed $value): int
+    {
+        if (is_int($value) || is_float($value) || is_string($value)) {
+            return (int) $value;
+        }
+        return 0;
+    }
+
+    private function toFloat(mixed $value): float
+    {
+        if (is_int($value) || is_float($value) || is_string($value)) {
+            return (float) $value;
+        }
+        return 0.0;
+    }
+
+    private function toString(mixed $value): string
+    {
+        if (is_string($value)) {
+            return $value;
+        }
+        if (is_int($value) || is_float($value)) {
+            return (string) $value;
+        }
+        return '';
+    }
+
+    private function toNullableString(mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+        return $this->toString($value);
     }
 }

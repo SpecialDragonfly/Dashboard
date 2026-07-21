@@ -27,13 +27,35 @@ class YahooFinanceService
         return $minutes < 480 || $minutes > 990; // before 08:00 or after 16:30
     }
 
-    /** Parses the status code out of $http_response_header (set by the http:// stream wrapper). */
+    /**
+     * Parses the status code out of $http_response_header (set by the http:// stream wrapper).
+     *
+     * @param array<int, string> $responseHeaders
+     */
     private function parseHttpStatus(array $responseHeaders): ?int
     {
         if (!isset($responseHeaders[0]) || !preg_match('#^HTTP/\S+\s+(\d{3})#', $responseHeaders[0], $m)) {
             return null;
         }
         return (int) $m[1];
+    }
+
+    /** Casts a decoded-JSON value to float, treating anything non-numeric as 0.0. */
+    private function toFloat(mixed $value): float
+    {
+        return is_numeric($value) ? (float) $value : 0.0;
+    }
+
+    /** Casts a decoded-JSON value to int, treating anything non-numeric as 0. */
+    private function toInt(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    /** @return array<array-key, mixed> */
+    private function toArrayOrEmpty(mixed $value): array
+    {
+        return is_array($value) ? $value : [];
     }
 
     private function logChartCall(string $url, int|string $status): void
@@ -70,8 +92,9 @@ class YahooFinanceService
             ],
         ];
         $context = stream_context_create($options);
+        $http_response_header = [];
         $body   = @file_get_contents($url, false, $context);
-        $status = $this->parseHttpStatus($http_response_header ?? []);
+        $status = $this->parseHttpStatus($http_response_header);
         $this->logChartCall($url, $status ?? 'no response (connection failed)');
 
         if ($body === false) {
@@ -100,34 +123,51 @@ class YahooFinanceService
             $lastChecked = time();
         }
 
-        $data   = json_decode(file_get_contents($cacheFile), true);
-        $result = $data['chart']['result'][0] ?? null;
+        $raw = file_get_contents($cacheFile);
+        if ($raw === false) {
+            @unlink($cacheFile);
+            throw new RuntimeException("Yahoo Finance cache unreadable for $symbol ($cacheFile)");
+        }
 
-        if ($result === null) {
+        $data   = json_decode($raw, true);
+        $chart  = is_array($data) ? $this->toArrayOrEmpty($data['chart'] ?? null) : [];
+        $results = $this->toArrayOrEmpty($chart['result'] ?? null);
+        $result = $results[0] ?? null;
+
+        if (!is_array($result)) {
             @unlink($cacheFile); // don't let a corrupt/empty cache keep poisoning every read
             throw new RuntimeException("Yahoo Finance returned no chart result for $symbol (empty or invalid cache)");
         }
 
-        $meta   = $result['meta'];
-        $quote  = $result['indicators']['quote'][0];
-        $tss    = $result['timestamp'] ?? [];
+        $meta       = $this->toArrayOrEmpty($result['meta'] ?? null);
+        $indicators = $this->toArrayOrEmpty($result['indicators'] ?? null);
+        $quotes     = $this->toArrayOrEmpty($indicators['quote'] ?? null);
+        $quote      = $this->toArrayOrEmpty($quotes[0] ?? null);
+        $rawTimestamps = $this->toArrayOrEmpty($result['timestamp'] ?? null);
 
-        $ohlc = [];
-        foreach ($tss as $i => $_) {
+        $opens  = $this->toArrayOrEmpty($quote['open']  ?? null);
+        $highs  = $this->toArrayOrEmpty($quote['high']  ?? null);
+        $lows   = $this->toArrayOrEmpty($quote['low']   ?? null);
+        $closes = $this->toArrayOrEmpty($quote['close'] ?? null);
+
+        $timestamps = [];
+        $ohlc       = [];
+        foreach (array_values($rawTimestamps) as $i => $ts) {
+            $timestamps[] = $this->toInt($ts);
             $ohlc[] = [
-                round((float) ($quote['open'][$i]  ?? 0), 4),
-                round((float) ($quote['high'][$i]  ?? 0), 4),
-                round((float) ($quote['low'][$i]   ?? 0), 4),
-                round((float) ($quote['close'][$i] ?? 0), 4),
+                round($this->toFloat($opens[$i]  ?? 0), 4),
+                round($this->toFloat($highs[$i]  ?? 0), 4),
+                round($this->toFloat($lows[$i]   ?? 0), 4),
+                round($this->toFloat($closes[$i] ?? 0), 4),
             ];
         }
 
         return new StockQuote(
             $symbol,
-            (float) ($meta['regularMarketPrice'] ?? 0),
-            (int) ($meta['regularMarketTime']    ?? 0),
+            $this->toFloat($meta['regularMarketPrice'] ?? 0),
+            $this->toInt($meta['regularMarketTime']    ?? 0),
             $lastChecked,
-            $tss,
+            $timestamps,
             $ohlc,
         );
     }

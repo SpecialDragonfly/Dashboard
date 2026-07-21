@@ -14,6 +14,9 @@ class ChartsController extends AbstractController
         private DividendService $dividendService,
     ) {}
 
+    /**
+     * @param array<string, mixed> $args
+     */
     public function index(Request $request, Response $response, array $args): Response
     {
         $response->getBody()->write(
@@ -22,9 +25,16 @@ class ChartsController extends AbstractController
         return $response;
     }
 
+    /**
+     * @param array<string, mixed> $args
+     */
     public function growth(Request $request, Response $response, array $args): Response
     {
-        $response->getBody()->write(json_encode($this->dividendService->getPortfolioGrowth()));
+        $json = json_encode($this->dividendService->getPortfolioGrowth());
+        if ($json === false) {
+            $json = '[]';
+        }
+        $response->getBody()->write($json);
         return $response->withHeader('Content-Type', 'application/json');
     }
 }

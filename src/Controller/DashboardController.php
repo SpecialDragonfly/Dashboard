@@ -14,6 +14,9 @@ class DashboardController extends AbstractController
         private BlogService $blogService,
     ) {}
 
+    /**
+     * @param array<string, mixed> $args
+     */
     public function index(Request $request, Response $response, array $args): Response
     {
         $user = $request->getAttribute('user');

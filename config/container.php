@@ -23,6 +23,27 @@ use Psr\Container\ContainerInterface;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
+/**
+ * Fetch a service from the container with its concrete type verified, so
+ * PHPStan (and callers) see the real type instead of ContainerInterface::get()'s
+ * generic `mixed` return.
+ *
+ * @template T of object
+ * @param class-string<T> $class
+ * @return T
+ */
+function containerGet(ContainerInterface $c, string $class): object
+{
+    $service = $c->get($class);
+    if (!$service instanceof $class) {
+        throw new RuntimeException(sprintf(
+            'Container entry "%s" did not resolve to an instance of that class.',
+            $class,
+        ));
+    }
+    return $service;
+}
+
 return [
     // -- Twig --
     Environment::class => function () {
@@ -42,7 +63,14 @@ return [
     PDO::class => function () {
         // Falls back to getenv() since PHP CLI's default variables_order (no "E")
         // leaves $_ENV empty for shell-exported vars not loaded via .env.
-        $env = fn(string $key, string $default = null) => $_ENV[$key] ?? (getenv($key) ?: $default);
+        $env = function (string $key, string $default): string {
+            $envValue = $_ENV[$key] ?? null;
+            if (is_string($envValue)) {
+                return $envValue;
+            }
+            $getenvValue = getenv($key);
+            return $getenvValue !== false && $getenvValue !== '' ? $getenvValue : $default;
+        };
         if ($env('DB_CONNECTION', 'sqlite') === 'mysql') {
             $dsn = sprintf(
                 'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
@@ -61,68 +89,68 @@ return [
     },
 
     // -- Repositories --
-    UserRepository::class     => fn(ContainerInterface $c) => new UserRepository($c->get(PDO::class)),
-    BlogRepository::class     => fn(ContainerInterface $c) => new BlogRepository($c->get(PDO::class)),
-    RipperRepository::class   => fn(ContainerInterface $c) => new RipperRepository($c->get(PDO::class)),
-    DividendRepository::class => fn(ContainerInterface $c) => new DividendRepository($c->get(PDO::class)),
+    UserRepository::class     => fn(ContainerInterface $c) => new UserRepository(containerGet($c, PDO::class)),
+    BlogRepository::class     => fn(ContainerInterface $c) => new BlogRepository(containerGet($c, PDO::class)),
+    RipperRepository::class   => fn(ContainerInterface $c) => new RipperRepository(containerGet($c, PDO::class)),
+    DividendRepository::class => fn(ContainerInterface $c) => new DividendRepository(containerGet($c, PDO::class)),
 
     // -- Services --
-    AuthTokenService::class => fn(ContainerInterface $c) => new AuthTokenService($c->get(PDO::class)),
-    BlogService::class      => fn(ContainerInterface $c) => new BlogService($c->get(BlogRepository::class)),
+    AuthTokenService::class => fn(ContainerInterface $c) => new AuthTokenService(containerGet($c, PDO::class)),
+    BlogService::class      => fn(ContainerInterface $c) => new BlogService(containerGet($c, BlogRepository::class)),
     YahooFinanceService::class => fn(ContainerInterface $c) => new YahooFinanceService(
         dirname(__DIR__) . '/var/yahoo-cache/',
-        $c->get(DividendRepository::class),
+        containerGet($c, DividendRepository::class),
     ),
     SnowballAnalyticsService::class => fn(ContainerInterface $c) => new SnowballAnalyticsService(
         dirname(__DIR__) . '/var/snowball-cache/',
     ),
-    DividendCalendarInterface::class => fn(ContainerInterface $c) => $c->get(SnowballAnalyticsService::class),
+    DividendCalendarInterface::class => fn(ContainerInterface $c) => containerGet($c, SnowballAnalyticsService::class),
     DividendService::class  => fn(ContainerInterface $c) => new DividendService(
-        $c->get(DividendRepository::class),
-        $c->get(YahooFinanceService::class),
-        $c->get(DividendCalendarInterface::class),
+        containerGet($c, DividendRepository::class),
+        containerGet($c, YahooFinanceService::class),
+        containerGet($c, DividendCalendarInterface::class),
         dirname(__DIR__) . '/var/freetrade-shares.csv',
     ),
     RipperService::class    => fn(ContainerInterface $c) => new RipperService(
-        $c->get(RipperRepository::class),
+        containerGet($c, RipperRepository::class),
         dirname(__DIR__) . '/var/ripper/',
         dirname(__DIR__) . '/public/assets/ripper/thumbnails/',
     ),
 
     // -- Middleware --
     TokenAuthMiddleware::class => fn(ContainerInterface $c) => new TokenAuthMiddleware(
-        $c->get(AuthTokenService::class),
-        $c->get(UserRepository::class),
+        containerGet($c, AuthTokenService::class),
+        containerGet($c, UserRepository::class),
     ),
     OptionalAuthMiddleware::class => fn(ContainerInterface $c) => new OptionalAuthMiddleware(
-        $c->get(AuthTokenService::class),
-        $c->get(UserRepository::class),
+        containerGet($c, AuthTokenService::class),
+        containerGet($c, UserRepository::class),
     ),
 
     // -- Controllers --
     DashboardController::class => fn(ContainerInterface $c) => new DashboardController(
-        $c->get(Environment::class),
-        $c->get(BlogService::class),
+        containerGet($c, Environment::class),
+        containerGet($c, BlogService::class),
     ),
     AuthController::class => fn(ContainerInterface $c) => new AuthController(
-        $c->get(Environment::class),
-        $c->get(UserRepository::class),
-        $c->get(AuthTokenService::class),
+        containerGet($c, Environment::class),
+        containerGet($c, UserRepository::class),
+        containerGet($c, AuthTokenService::class),
     ),
     BlogController::class => fn(ContainerInterface $c) => new BlogController(
-        $c->get(Environment::class),
-        $c->get(BlogService::class),
+        containerGet($c, Environment::class),
+        containerGet($c, BlogService::class),
     ),
     RipperController::class => fn(ContainerInterface $c) => new RipperController(
-        $c->get(Environment::class),
-        $c->get(RipperService::class),
+        containerGet($c, Environment::class),
+        containerGet($c, RipperService::class),
     ),
     DividendController::class => fn(ContainerInterface $c) => new DividendController(
-        $c->get(Environment::class),
-        $c->get(DividendService::class),
+        containerGet($c, Environment::class),
+        containerGet($c, DividendService::class),
     ),
     ChartsController::class => fn(ContainerInterface $c) => new ChartsController(
-        $c->get(Environment::class),
-        $c->get(DividendService::class),
+        containerGet($c, Environment::class),
+        containerGet($c, DividendService::class),
     ),
 ];

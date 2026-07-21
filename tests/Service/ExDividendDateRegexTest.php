@@ -76,8 +76,9 @@ class ExDividendDateRegexTest extends TestCase
     public function testNAValueIsRecognisable(): void
     {
         $html = '<span>Ex-Dividend Date</span><span class="value">N/A</span>';
-        $this->assertSame('N/A', $this->match($html));
-        // Confirm that the caller's N/A guard would reject it
-        $this->assertFalse((bool) strtotime('N/A'));
+        $value = $this->match($html);
+        // Confirm that the caller's N/A guard would reject the value the regex actually extracted
+        $this->assertFalse((bool) strtotime((string) $value));
+        $this->assertSame('N/A', $value);
     }
 }

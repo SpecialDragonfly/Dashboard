@@ -18,13 +18,28 @@ class SnowballAnalyticsService implements DividendCalendarInterface
     /**
      * Fetch all declared LSE dividends from Snowball Analytics, paginating until
      * exhausted. Results are cached for 24 hours.
+     *
+     * @return array<int, array{
+     *     name: string,
+     *     ticker: string,
+     *     amount: float|int|string|null,
+     *     currency: string,
+     *     exDivDate: string,
+     *     exDivTimestamp: int
+     * }>
      */
     public function getDeclaredDividends(): array
     {
         $cacheFile = $this->cacheDir . 'snowball-declared.json';
 
         if (file_exists($cacheFile) && filemtime($cacheFile) > time() - self::CACHE_TTL) {
-            return json_decode(file_get_contents($cacheFile), true) ?? [];
+            $cached = file_get_contents($cacheFile);
+            if ($cached !== false) {
+                $decoded = json_decode($cached, true);
+                if (is_array($decoded)) {
+                    return $this->normalizeCachedDividends($decoded);
+                }
+            }
         }
 
         $results = [];
@@ -56,35 +71,62 @@ class SnowballAnalyticsService implements DividendCalendarInterface
             $body = curl_exec($ch);
             $status = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-            if ($body === false || $status !== 200) {
+            if (!is_string($body) || $status !== 200) {
                 error_log("[Snowball] HTTP $status on page $page");
                 break;
             }
 
-            $data = json_decode($body, true) ?? [];
-            $items = $data['data'] ?? [];
-            $totalCount = (int)($data['totalCount'] ?? 0);
-            $pageSize = (int)($data['pageSize'] ?? 50);
+            $data = json_decode($body, true);
+            $data = is_array($data) ? $data : [];
+
+            $items = isset($data['data']) && is_array($data['data']) ? $data['data'] : [];
+
+            $totalCount = isset($data['totalCount']) && is_numeric($data['totalCount'])
+                ? (int)$data['totalCount']
+                : 0;
+            $pageSize = isset($data['pageSize']) && is_numeric($data['pageSize'])
+                ? (int)$data['pageSize']
+                : 50;
             $totalPages = (int) ceil($totalCount / max($pageSize, 1));
 
             foreach ($items as $item) {
-                if (($item['status'] ?? '') !== 'declared') {
+                if (!is_array($item)) {
+                    continue;
+                }
+
+                $status = $item['status'] ?? '';
+                if (!is_string($status) || $status !== 'declared') {
                     continue;
                 }
 
                 $ticker = $item['ticker'] ?? '';
+                $ticker = is_string($ticker) ? $ticker : '';
+
                 $exDivDate = $item['exDividendDate'] ?? '';
+                $exDivDate = is_string($exDivDate) ? $exDivDate : '';
+
                 $ts = $exDivDate !== '' ? (int)strtotime($exDivDate) : 0;
 
                 if ($ticker === '' || $ts <= 0) {
                     continue;
                 }
 
+                $name = $item['companyName'] ?? $item['name'] ?? '';
+                $name = is_string($name) ? $name : '';
+
+                $amount = $item['perShare'] ?? null;
+                if (!is_float($amount) && !is_int($amount) && !is_string($amount)) {
+                    $amount = null;
+                }
+
+                $currency = $item['currency'] ?? '';
+                $currency = is_string($currency) ? $currency : '';
+
                 $results[] = [
-                    'name'           => $item['companyName'] ?? $item['name'] ?? '',
+                    'name'           => $name,
                     'ticker'         => $ticker,
-                    'amount'         => $item['perShare'] ?? null,
-                    'currency'       => $item['currency'] ?? '',
+                    'amount'         => $amount,
+                    'currency'       => $currency,
                     'exDivDate'      => $exDivDate,
                     'exDivTimestamp' => $ts,
                 ];
@@ -94,6 +136,65 @@ class SnowballAnalyticsService implements DividendCalendarInterface
         } while ($page <= min($totalPages, self::MAX_PAGES));
 
         file_put_contents($cacheFile, json_encode($results));
+        return $results;
+    }
+
+    /**
+     * Validate and reshape a previously-cached dividend list (raw decoded JSON)
+     * back into the precise shape this service guarantees. The cache file is
+     * written by this class itself, but its contents are read back as `mixed`,
+     * so each field is checked defensively before use.
+     *
+     * @param array<mixed> $decoded
+     * @return array<int, array{
+     *     name: string,
+     *     ticker: string,
+     *     amount: float|int|string|null,
+     *     currency: string,
+     *     exDivDate: string,
+     *     exDivTimestamp: int
+     * }>
+     */
+    private function normalizeCachedDividends(array $decoded): array
+    {
+        $results = [];
+
+        foreach ($decoded as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $name = $item['name'] ?? '';
+            $ticker = $item['ticker'] ?? '';
+            $currency = $item['currency'] ?? '';
+            $exDivDate = $item['exDivDate'] ?? '';
+            $exDivTimestamp = $item['exDivTimestamp'] ?? null;
+            $amount = $item['amount'] ?? null;
+
+            if (
+                !is_string($name)
+                || !is_string($ticker)
+                || !is_string($currency)
+                || !is_string($exDivDate)
+                || !is_numeric($exDivTimestamp)
+            ) {
+                continue;
+            }
+
+            if (!is_float($amount) && !is_int($amount) && !is_string($amount) && $amount !== null) {
+                $amount = null;
+            }
+
+            $results[] = [
+                'name'           => $name,
+                'ticker'         => $ticker,
+                'amount'         => $amount,
+                'currency'       => $currency,
+                'exDivDate'      => $exDivDate,
+                'exDivTimestamp' => (int)$exDivTimestamp,
+            ];
+        }
+
         return $results;
     }
 }
