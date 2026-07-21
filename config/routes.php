@@ -41,6 +41,7 @@ return function (App $app) {
     $app->get('/dividends/prices',                  [DividendController::class, 'prices'])->add(TokenAuthMiddleware::class);
     $app->get('/dividends/upcoming',                [DividendController::class, 'upcoming'])->add(TokenAuthMiddleware::class);
     $app->post('/dividends/payment',                [DividendController::class, 'addPayment'])->add(TokenAuthMiddleware::class);
+    $app->post('/dividends/cookies',                [DividendController::class, 'uploadCookies'])->add(TokenAuthMiddleware::class);
 
     // -- Charts (auth required) --
     $app->get('/charts',        [ChartsController::class, 'index'])->add(TokenAuthMiddleware::class);

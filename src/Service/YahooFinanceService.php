@@ -8,6 +8,8 @@ use RuntimeException;
 
 class YahooFinanceService
 {
+    private const USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36';
+
     public function __construct(
         private string $cacheDir,
         private DividendRepository $repo,
@@ -27,123 +29,87 @@ class YahooFinanceService
         return $minutes < 480 || $minutes > 990; // before 08:00 or after 16:30
     }
 
-    private function ua(): string
+    /**
+     * Store a cookie string copied from a browser's Yahoo Finance session
+     * (the value of the request's Cookie: header). Used as a manual fallback
+     * when the automatic session bootstrap (ensureAutoCrumb) fails — e.g. if
+     * Yahoo starts gating fc.yahoo.com behind its EU consent flow, which
+     * plain HTTP requests can't complete.
+     */
+    public function saveCookieJar(string $content): bool
     {
-        return "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36";
+        $content = trim($content);
+        if (!preg_match('/\w+=\S+/', $content)) {
+            return false;
+        }
+
+        file_put_contents($this->manualCookieFile(), $content);
+        @unlink($this->manualCrumbFile()); // force a fresh crumb for the new cookie
+        return true;
     }
 
-    private function cookieStringFile(): string
+    private function manualCookieFile(): string
     {
         return $this->cacheDir . 'yahoo-cookie-string.txt';
     }
 
-    private function loadCookies(): string
+    private function manualCrumbFile(): string
     {
-        $f = $this->cookieStringFile();
+        return $this->cacheDir . 'yahoo-manual-crumb.txt';
+    }
+
+    private function loadManualCookieString(): string
+    {
+        $f = $this->manualCookieFile();
         return file_exists($f) ? trim(file_get_contents($f)) : '';
     }
 
-    /**
-     * Obtain (and cache for 1 hour) a Yahoo Finance crumb.
-     * Requires a cookie string previously saved via saveCookies().
-     */
-    private function getSession(): array
+    private function isValidCrumb(string|false $crumb, int $status): bool
     {
-        $sessionFile = $this->cacheDir . 'yahoo-session.json';
+        return $crumb !== false
+            && $status < 400
+            && trim($crumb) !== ''
+            && !str_contains($crumb, '<html')
+            && !str_contains($crumb, 'Too Many Requests');
+    }
 
-        if (file_exists($sessionFile) && filemtime($sessionFile) > time() - 3600) {
-            return json_decode(file_get_contents($sessionFile), true);
-        }
-
-        $cookies = $this->loadCookies();
-        if ($cookies === '') {
-            error_log("[Yahoo] No cookie string on file — upload via the Dividends page");
-            return ['crumb' => ''];
-        }
-
+    /** @return array{0: string|false, 1: int} [crumb body, http status] */
+    private function requestCrumb(array $cookieOpt): array
+    {
         $ch = curl_init('https://query1.finance.yahoo.com/v1/test/getcrumb');
-        curl_setopt_array($ch, [
+        curl_setopt_array($ch, $cookieOpt + [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_USERAGENT      => $this->ua(),
-            CURLOPT_COOKIE         => $cookies,
-            CURLOPT_TIMEOUT        => 10,
-            CURLOPT_ENCODING       => '',
+            CURLOPT_TIMEOUT        => 15,
+            CURLOPT_USERAGENT      => self::USER_AGENT,
             CURLOPT_HTTPHEADER     => [
                 'Accept: application/json, text/plain, */*',
                 'Accept-Language: en-GB,en-US;q=0.9,en;q=0.8',
                 'Referer: https://finance.yahoo.com/',
-                'sec-fetch-dest: empty',
-                'sec-fetch-mode: cors',
-                'sec-fetch-site: same-site',
             ],
         ]);
         $crumb  = curl_exec($ch);
         $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        if ($crumb === false || $status >= 400 || strlen(trim($crumb)) < 3) {
-            error_log("[Yahoo] Failed to obtain crumb (HTTP $status): " . substr((string) $crumb, 0, 100));
-            return ['crumb' => ''];
-        }
-
-        $session = ['crumb' => trim($crumb)];
-        file_put_contents($sessionFile, json_encode($session));
-        return $session;
+        return [$crumb, $status];
     }
 
-    /**
-     * Store the cookie string copied from a browser request (the value of the
-     * -b / Cookie: header) and clear the cached crumb so the next request
-     * fetches a fresh one with the new cookies.
-     */
-    public function saveCookieJar(string $content): bool
+    /** @return array{0: string|false, 1: int, 2: string} [body, status, curl error] */
+    private function requestChart(string $symbol, string $crumb, array $cookieOpt): array
     {
-        $content = trim($content);
-        if (!preg_match('/\w+=\S+/', $content)) {
-            error_log("[Yahoo] Rejected cookie upload — no key=value pairs found");
-            return false;
-        }
+        $url = 'https://query2.finance.yahoo.com/v8/finance/chart/'
+            . rawurlencode($symbol) . '?interval=1wk&range=6mo&crumb=' . rawurlencode($crumb);
 
-        file_put_contents($this->cookieStringFile(), $content);
-        $this->invalidateSession();
-        error_log("[Yahoo] Cookie string saved");
-        return true;
-    }
-
-    private function invalidateSession(): void
-    {
-        $sessionFile = $this->cacheDir . 'yahoo-session.json';
-        if (file_exists($sessionFile)) {
-            unlink($sessionFile);
-        }
-    }
-
-    /**
-     * @throws RuntimeException       on connection failure or non-2xx response
-     * @throws RuntimeException(429)  on rate limit — callers should propagate this
-     */
-    private function fetchYahoo(string $url, bool $retry = true): string
-    {
-        $session = $this->getSession();
-
-        $fullUrl = $session['crumb']
-            ? $url . (str_contains($url, '?') ? '&' : '?') . 'crumb=' . rawurlencode($session['crumb'])
-            : $url;
-error_log("Attempting to get ".$fullUrl);
-        $ch = curl_init($fullUrl);
-        curl_setopt_array($ch, [
+        $ch = curl_init($url);
+        curl_setopt_array($ch, $cookieOpt + [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_USERAGENT      => $this->ua(),
-            CURLOPT_COOKIE         => $this->loadCookies(),
             CURLOPT_TIMEOUT        => 15,
             CURLOPT_ENCODING       => '',
+            CURLOPT_USERAGENT      => self::USER_AGENT,
             CURLOPT_HTTPHEADER     => [
                 'Accept: application/json, text/plain, */*',
                 'Accept-Language: en-GB,en-US;q=0.9,en;q=0.8',
                 'Referer: https://finance.yahoo.com/',
-                'sec-fetch-dest: empty',
-                'sec-fetch-mode: cors',
-                'sec-fetch-site: same-site',
             ],
         ]);
 
@@ -152,47 +118,154 @@ error_log("Attempting to get ".$fullUrl);
         $err    = curl_error($ch);
         curl_close($ch);
 
+        return [$body, $status, $err];
+    }
+
+    /**
+     * Automatic session bootstrap: GET fc.yahoo.com for a cookie, then
+     * GET /v1/test/getcrumb for the crumb — both plain HTTP, no JS involved.
+     * Persisted to the cache dir so every subsequent symbol lookup reuses the
+     * same session instead of re-bootstrapping per request.
+     *
+     * @throws RuntimeException if the bootstrap itself fails
+     */
+    private function ensureAutoCrumb(string $cookieFile, string $crumbFile): string
+    {
+        if (file_exists($cookieFile) && file_exists($crumbFile)) {
+            return file_get_contents($crumbFile);
+        }
+
+        $ch = curl_init('https://fc.yahoo.com');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 15,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_COOKIEJAR      => $cookieFile,
+            CURLOPT_COOKIEFILE     => $cookieFile,
+            CURLOPT_USERAGENT      => self::USER_AGENT,
+        ]);
+        curl_exec($ch);
+        curl_close($ch);
+
+        [$crumb, $status] = $this->requestCrumb([CURLOPT_COOKIEJAR => $cookieFile, CURLOPT_COOKIEFILE => $cookieFile]);
+
+        if (!$this->isValidCrumb($crumb, $status)) {
+            throw new RuntimeException("Failed to obtain Yahoo Finance session crumb via auto-bootstrap (status $status)");
+        }
+
+        file_put_contents($crumbFile, $crumb);
+        return $crumb;
+    }
+
+    /**
+     * Crumb fetched using a manually-uploaded cookie string (see
+     * saveCookieJar). Cached for 1 hour since the cookie itself doesn't
+     * refresh automatically — it needs a fresh browser paste when it expires.
+     *
+     * @throws RuntimeException if the crumb fetch fails
+     */
+    private function ensureManualCrumb(string $cookieString): string
+    {
+        $crumbFile = $this->manualCrumbFile();
+
+        if (file_exists($crumbFile) && filemtime($crumbFile) > time() - 3600) {
+            return file_get_contents($crumbFile);
+        }
+
+        [$crumb, $status] = $this->requestCrumb([CURLOPT_COOKIE => $cookieString]);
+
+        if (!$this->isValidCrumb($crumb, $status)) {
+            throw new RuntimeException("Failed to obtain Yahoo Finance session crumb via manual cookie (status $status)");
+        }
+
+        file_put_contents($crumbFile, $crumb);
+        return $crumb;
+    }
+
+    private function fetchViaAuto(string $symbol): string
+    {
+        $cookieFile = $this->cacheDir . 'session-cookies.txt';
+        $crumbFile  = $this->cacheDir . 'session-crumb.txt';
+
+        $crumb = $this->ensureAutoCrumb($cookieFile, $crumbFile);
+        [$body, $status, $err] = $this->requestChart($symbol, $crumb, [CURLOPT_COOKIEFILE => $cookieFile]);
+
+        // Session may have expired — bootstrap a fresh one and retry once.
+        if ($status === 401 || $status === 403) {
+            @unlink($cookieFile);
+            @unlink($crumbFile);
+            $crumb = $this->ensureAutoCrumb($cookieFile, $crumbFile);
+            [$body, $status, $err] = $this->requestChart($symbol, $crumb, [CURLOPT_COOKIEFILE => $cookieFile]);
+        }
+
         if ($body === false || $err !== '') {
-            error_log("[Yahoo] cURL error for $url: $err");
-            throw new RuntimeException("Yahoo Finance connection failed");
+            throw new RuntimeException("Yahoo Finance connection failed: $err");
         }
-
-        if ($status === 401 && $retry) {
-            error_log("[Yahoo] 401 on $url — invalidating session and retrying");
-            $this->invalidateSession();
-            return $this->fetchYahoo($url, false);
-        }
-
-        if ($status === 429) {
-            error_log("[Yahoo] Rate limited (429): $url");
-            throw new RuntimeException("Yahoo Finance rate limit", 429);
-        }
-
         if ($status >= 400) {
-            error_log("[Yahoo] HTTP $status for $url — " . substr($body, 0, 300));
-            throw new RuntimeException("Yahoo Finance returned HTTP $status");
+            throw new RuntimeException("Yahoo Finance returned HTTP $status for $symbol (auto session)");
+        }
+
+        return $body;
+    }
+
+    private function fetchViaManualCookie(string $symbol, string $cookieString): string
+    {
+        $crumb = $this->ensureManualCrumb($cookieString);
+        [$body, $status, $err] = $this->requestChart($symbol, $crumb, [CURLOPT_COOKIE => $cookieString]);
+
+        if ($status === 401) {
+            @unlink($this->manualCrumbFile());
+            $crumb = $this->ensureManualCrumb($cookieString);
+            [$body, $status, $err] = $this->requestChart($symbol, $crumb, [CURLOPT_COOKIE => $cookieString]);
+        }
+
+        if ($body === false || $err !== '') {
+            throw new RuntimeException("Yahoo Finance connection failed: $err");
+        }
+        if ($status >= 400) {
+            throw new RuntimeException("Yahoo Finance returned HTTP $status for $symbol (manual cookie session)");
         }
 
         return $body;
     }
 
     /**
+     * Try the automatic session first; if that fails outright (not just a
+     * bad HTTP status but a thrown RuntimeException — e.g. fc.yahoo.com
+     * itself is unreachable or gated), fall back to a manually-uploaded
+     * cookie string if one has been saved via saveCookieJar().
+     *
+     * @throws RuntimeException if both the automatic session and the manual
+     *         fallback (or its absence) fail
+     */
+    private function fetchChartBody(string $symbol): string
+    {
+        try {
+            return $this->fetchViaAuto($symbol);
+        } catch (RuntimeException $autoFailure) {
+            $cookieString = $this->loadManualCookieString();
+            if ($cookieString === '') {
+                throw $autoFailure;
+            }
+            return $this->fetchViaManualCookie($symbol, $cookieString);
+        }
+    }
+
+    /**
      * Fetch a 6-month weekly OHLC quote for a portfolio stock.
      * Cache TTL: 15 minutes while market is open; indefinite while closed.
+     *
+     * @throws RuntimeException on connection failure or non-2xx response
      */
     public function getSymbolQuote(string $symbol): StockQuote
     {
         $cacheFile   = $this->cacheDir . $symbol . '-6mo-1wk.json';
         $lastChecked = $this->repo->getSymbolLastChecked($symbol);
-        $stale       = ($lastChecked + 900) < time(); // 15 minutes
+        $stale       = ($lastChecked + 900) < time();
 
-        $needsFetch = !file_exists($cacheFile) || ($stale && !$this->isMarketClosed());
-
-        if ($needsFetch) {
-            $json = $this->fetchYahoo(
-                'https://query1.finance.yahoo.com/v8/finance/chart/' . rawurlencode($symbol) . '?interval=1wk&range=6mo'
-            );
-            file_put_contents($cacheFile, $json);
+        if (!file_exists($cacheFile) || ($stale && !$this->isMarketClosed())) {
+            $body = $this->fetchChartBody($symbol);
+            file_put_contents($cacheFile, $body);
             $this->repo->upsertSymbolLastChecked($symbol, time());
             $lastChecked = time();
         }
@@ -216,87 +289,10 @@ error_log("Attempting to get ".$fullUrl);
         return new StockQuote(
             $meta['symbol'],
             (float) ($meta['regularMarketPrice'] ?? 0),
-            (int)   ($meta['regularMarketTime']  ?? 0),
+            (int) ($meta['regularMarketTime']    ?? 0),
             $lastChecked,
             $tss,
             $ohlc,
         );
-    }
-
-    /**
-     * Fetch upcoming dividend info for one symbol via the quoteSummary JSON API.
-     *
-     * Uses calendarEvents + summaryDetail modules in a single call — avoids HTML
-     * scraping entirely (which was hitting GDPR cookie walls before the page loaded).
-     *
-     * Cache rules:
-     *  - Known future ex-div date → skip until that date has passed.
-     *  - Otherwise → re-check after 24 hours.
-     *
-     * Returns null when Yahoo returns no dividend data for the symbol.
-     */
-    public function getUpcomingDividendInfo(string $symbol): ?array
-    {
-        $cacheFile = $this->cacheDir . $symbol . '-calendarEvents.json';
-
-        if (file_exists($cacheFile)) {
-            $cached         = json_decode(file_get_contents($cacheFile), true);
-            $exDivTimestamp = (int) ($cached['exDivTimestamp'] ?? 0);
-
-            if ($exDivTimestamp > time()) {
-                // Ex-div date still in the future — no need to re-check
-                return $cached['data'];
-            }
-
-            // Ex-div date passed (or unknown) — honour 24-hour cache
-            if (filemtime($cacheFile) > time() - 86400) {
-                return $cached['data'];
-            }
-        }
-
-        $url  = 'https://query1.finance.yahoo.com/v10/finance/quoteSummary/' . rawurlencode($symbol)
-              . '?modules=calendarEvents%2CsummaryDetail%2Cprice';
-        $json = $this->fetchYahoo($url);
-
-        $data   = json_decode($json, true);
-        $result = $data['quoteSummary']['result'][0] ?? null;
-
-        if ($result === null) {
-            error_log("[Yahoo] quoteSummary returned no result for $symbol");
-            file_put_contents($cacheFile, json_encode(['exDivTimestamp' => 0, 'data' => null]));
-            return null;
-        }
-
-        // calendarEvents carries the forward-looking ex-div / payment dates
-        $cal            = $result['calendarEvents'] ?? [];
-        $exDivTimestamp = (int) ($cal['exDividendDate']['raw'] ?? 0);
-        $payTimestamp   = (int) ($cal['dividendDate']['raw']   ?? 0);
-
-        // summaryDetail carries the declared dividend rate
-        $detail       = $result['summaryDetail'] ?? [];
-        $dividendRate = (float) ($detail['dividendRate']['raw'] ?? 0);
-
-        // price module carries the human-readable company name
-        $name = (string) ($result['price']['shortName'] ?? '');
-
-        if ($exDivTimestamp <= 0) {
-            file_put_contents($cacheFile, json_encode(['exDivTimestamp' => 0, 'data' => null]));
-            return null;
-        }
-
-        $row = [
-            'name'           => $name,
-            'exDivDate'      => date('Y-m-d', $exDivTimestamp),
-            'exDivTimestamp' => $exDivTimestamp,
-            'paymentDate'    => $payTimestamp > 0 ? date('Y-m-d', $payTimestamp) : null,
-            'dividendRate'   => $dividendRate > 0 ? $dividendRate : null,
-        ];
-
-        file_put_contents($cacheFile, json_encode([
-            'exDivTimestamp' => $exDivTimestamp,
-            'data'           => $row,
-        ]));
-
-        return $row;
     }
 }
