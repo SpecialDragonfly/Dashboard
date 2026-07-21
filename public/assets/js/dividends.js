@@ -354,34 +354,6 @@ function renderUpcomingTable(items) {
         </table>`;
 }
 
-// ─── Cookie upload ────────────────────────────────────────────────────────────
-
-document.getElementById('cookie-upload-form').addEventListener('submit', async e => {
-    e.preventDefault();
-    const status = document.getElementById('cookie-status');
-    const file = document.getElementById('cookie-file').files[0];
-    if (!file) return;
-
-    status.textContent = 'Uploading…';
-    status.className = 'cookie-status';
-
-    const body = new FormData();
-    body.append('cookies', file);
-
-    const res = await AuthManager.fetch('/dividends/cookies', {method: 'POST', body});
-
-    if (res && res.ok) {
-        status.textContent = 'Saved — reloading dividend data…';
-        status.className = 'cookie-status cookie-status-ok';
-        e.target.reset();
-        setTimeout(() => loadUpcoming(), 1000);
-    } else {
-        const data = res ? await res.json().catch(() => ({})) : {};
-        status.textContent = data.error ?? 'Upload failed';
-        status.className = 'cookie-status cookie-status-err';
-    }
-});
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatDividendAmount(amount, currency) {

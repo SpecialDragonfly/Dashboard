@@ -64,11 +64,6 @@ class DividendService
         return $results;
     }
 
-    public function saveYahooCookies(string $content): bool
-    {
-        return $this->yahoo->saveCookieJar($content);
-    }
-
     /**
      * Lazily ensure today's portfolio value snapshot has a row per portfolio
      * symbol. Partial commit: each symbol succeeds or fails independently —

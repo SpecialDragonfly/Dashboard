@@ -91,28 +91,6 @@ class DividendController extends AbstractController
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    public function uploadCookies(Request $request, Response $response, array $args): Response
-    {
-        $files = $request->getUploadedFiles();
-        $file  = $files['cookies'] ?? null;
-
-        if ($file === null || $file->getError() !== UPLOAD_ERR_OK) {
-            $response->getBody()->write(json_encode(['error' => 'No cookie file uploaded']));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
-        }
-
-        $content = (string) $file->getStream();
-        $saved   = $this->dividendService->saveYahooCookies($content);
-
-        if (!$saved) {
-            $response->getBody()->write(json_encode(['error' => 'Cookie file did not look like a valid cookie string']));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
-        }
-
-        $response->getBody()->write(json_encode(['success' => true]));
-        return $response->withHeader('Content-Type', 'application/json');
-    }
-
     public function addPayment(Request $request, Response $response, array $args): Response
     {
         $body     = (array) $request->getParsedBody();
