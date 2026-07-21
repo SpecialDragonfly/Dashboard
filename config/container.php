@@ -2,6 +2,7 @@
 
 use App\Controller\AuthController;
 use App\Controller\BlogController;
+use App\Controller\ChartsController;
 use App\Controller\DashboardController;
 use App\Controller\DividendController;
 use App\Controller\RipperController;
@@ -35,10 +36,24 @@ return [
     },
 
     // -- Database --
-    // Currently SQLite for local development. Will switch to MySQL before production.
-    // When switching: replace DSN and add DB_HOST/DB_NAME/DB_USER/DB_PASS to .env.
+    // DB_CONNECTION=mysql + DB_HOST/DB_NAME/DB_USER/DB_PASS/DB_PORT in .env switches
+    // to MySQL (production, or local MariaDB via docker-compose). Same switch as
+    // phinx.php, which the migrations run against. Defaults to SQLite (local dev).
     PDO::class => function () {
-        $pdo = new PDO('sqlite:' . dirname(__DIR__) . '/var/data.db');
+        // Falls back to getenv() since PHP CLI's default variables_order (no "E")
+        // leaves $_ENV empty for shell-exported vars not loaded via .env.
+        $env = fn(string $key, string $default = null) => $_ENV[$key] ?? (getenv($key) ?: $default);
+        if ($env('DB_CONNECTION', 'sqlite') === 'mysql') {
+            $dsn = sprintf(
+                'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
+                $env('DB_HOST', '127.0.0.1'),
+                $env('DB_PORT', '3306'),
+                $env('DB_NAME', 'notquitehuman'),
+            );
+            $pdo = new PDO($dsn, $env('DB_USER', ''), $env('DB_PASS', ''));
+        } else {
+            $pdo = new PDO('sqlite:' . dirname(__DIR__) . '/var/data.db');
+        }
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
@@ -103,6 +118,10 @@ return [
         $c->get(RipperService::class),
     ),
     DividendController::class => fn(ContainerInterface $c) => new DividendController(
+        $c->get(Environment::class),
+        $c->get(DividendService::class),
+    ),
+    ChartsController::class => fn(ContainerInterface $c) => new ChartsController(
         $c->get(Environment::class),
         $c->get(DividendService::class),
     ),

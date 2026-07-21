@@ -28,9 +28,9 @@ class AuthTokenService
     public function validateToken(string $token): ?int
     {
         $stmt = $this->db->prepare(
-            "SELECT user_id FROM auth_tokens WHERE token = ? AND expires_at > datetime('now')"
+            'SELECT user_id FROM auth_tokens WHERE token = ? AND expires_at > ?'
         );
-        $stmt->execute([$token]);
+        $stmt->execute([$token, (new DateTimeImmutable())->format('Y-m-d H:i:s')]);
         $row = $stmt->fetch();
         return $row ? (int) $row['user_id'] : null;
     }

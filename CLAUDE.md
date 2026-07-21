@@ -1,23 +1,8 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Project Overview
 
 This is a Slim 4 rebuild of the NotQuiteHuman web application. The project is in active scaffolding — architecture is locked and documented in `ARCHITECTURE.md`. Read that file first for full context on planned structure, routes, and service wiring before implementing features.
-
-## Commands
-
-```bash
-# Install dependencies
-composer install
-
-# Start the application
-docker-compose up --build
-
-# Access PHP container
-docker-compose exec php bash
-```
 
 There is currently no test suite or linter configured.
 
@@ -47,15 +32,6 @@ There is currently no test suite or linter configured.
 3. Controller calls Service → Service calls Repository → Repository runs SQL → hydrates Domain object
 4. Controller writes rendered Twig output to `$response->getBody()` and returns `$response`
 
-### Controllers (PSR-7 signature)
-```php
-public function action(Request $request, Response $response, array $args): Response
-{
-    $response->getBody()->write($this->twig->render('template.html.twig', $data));
-    return $response;
-}
-```
-
 ### Authentication
 - Bearer token-based; `TokenAuthMiddleware` (`src/Middleware/TokenAuthMiddleware.php`) is a PSR-15 middleware
 - Applied per-route in `config/routes.php` via `->add(TokenAuthMiddleware::class)`
@@ -70,38 +46,12 @@ public function action(Request $request, Response $response, array $args): Respo
 
 - **Dragonfly logo files** (`public/assets/js/dragonfly.js`, `dragonfly-points.js`) must be copied verbatim from the original codebase. The canvas call `draw(-10, 0, 1.2, 0.75)` must not change.
 - **Days Employed counter** start date is hardcoded: **May 28, 2024**
-- **Database is currently SQLite** (`var/data.db`). It will switch to MySQL (`notquitehuman`) before production. Only the PDO DSN in `config/container.php` changes — the schema, migrations, and all repository code stay the same.
+- **Database is SQLite by default** (`var/data.db`, local dev) or **MySQL** (`notquitehuman`, production and local MariaDB via docker-compose), switched via `DB_CONNECTION` in `.env` — see `config/container.php` and `phinx.php`. Same switch, same schema, same repository code either way.
 - When on MySQL, the existing tables must not be altered — only additive migrations
-- New tables added via versioned `.sql` files in `migrations/`, tracked in `migrations_applied` table
+- Migrations use **Phinx** (`robmorgan/phinx`), not hand-rolled SQL — PHP migration classes in `db/migrations/`, run via `vendor/bin/phinx migrate`. Phinx's adapter abstraction generates the correct DDL for either engine from one migration file, and tracks applied migrations in its own `phinxlog` table.
+- `db/migrations/0001`–`0007` port the real, live production schema 1:1 from the pre-rebuild app's own Phinx migrations (`notquitehuman/db/migrations/`) — these define the tables that already exist in production and must not be altered. `0008` (`blog_posts`) and `0009` (`portfolio_value_history`) are additive, rebuild-only tables with no pre-rebuild equivalent.
+- Repository code must match the *real* production column names, which occasionally differ from what you'd guess — e.g. `users.password`/`users.created` (not `password_hash`/`created_at`), `ripped_files.created` (not `created_at`). Don't rename columns to be "more correct"; fix the repository to match what's actually there.
+- Avoid SQLite-only or MySQL-only SQL in repository code (e.g. `datetime('now')`, `INSERT OR IGNORE`, `ON CONFLICT ... DO UPDATE`) since both engines are live targets — prefer portable patterns (bind the current timestamp from PHP; try/catch a unique-constraint violation instead of an engine-specific upsert).
 
-## Adding a New Route + Controller
 
-**`config/routes.php`:**
-```php
-$app->get('/feature', [FeatureController::class, 'index']);
-$app->post('/feature', [FeatureController::class, 'create']);
-```
 
-**`config/container.php`:**
-```php
-App\Controller\FeatureController::class => function (ContainerInterface $c) {
-    return new FeatureController(
-        $c->get(Environment::class),
-        $c->get(App\Service\FeatureService::class),
-    );
-},
-
-App\Service\FeatureService::class => function (ContainerInterface $c) {
-    return new FeatureService($c->get(App\Repository\FeatureRepository::class));
-},
-
-App\Repository\FeatureRepository::class => function (ContainerInterface $c) {
-    return new FeatureRepository($c->get(PDO::class));
-},
-```
-
-Auth-protected routes chain `->add(TokenAuthMiddleware::class)` in `config/routes.php`:
-```php
-$app->get('/dashboard', [DashboardController::class, 'index'])->add(TokenAuthMiddleware::class);
-$app->post('/feature',  [FeatureController::class, 'create'])->add(TokenAuthMiddleware::class);
-```

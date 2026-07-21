@@ -28,16 +28,16 @@ class RipperRepository
 
     public function findAll(): array
     {
-        $stmt = $this->db->query('SELECT * FROM ripped_files ORDER BY created_at DESC');
+        $stmt = $this->db->query('SELECT * FROM ripped_files ORDER BY created DESC');
         return array_map($this->hydrate(...), $stmt->fetchAll());
     }
 
     public function insert(string $url, string $videoId): void
     {
         $stmt = $this->db->prepare(
-            'INSERT INTO ripped_files (url, video_id) VALUES (?, ?)'
+            'INSERT INTO ripped_files (url, video_id, created) VALUES (?, ?, ?)'
         );
-        $stmt->execute([$url, $videoId]);
+        $stmt->execute([$url, $videoId, (new DateTimeImmutable())->format('Y-m-d H:i:s')]);
     }
 
     public function updateTitle(string $videoId, string $title): void
@@ -67,7 +67,7 @@ class RipperRepository
             $row['title'],
             $row['thumbnail'],
             $row['path'],
-            new DateTimeImmutable($row['created_at']),
+            new DateTimeImmutable($row['created']),
         );
     }
 }

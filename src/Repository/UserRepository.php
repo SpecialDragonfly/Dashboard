@@ -31,8 +31,8 @@ class UserRepository
         return new User(
             (int) $row['id'],
             $row['username'],
-            $row['password_hash'],
-            new DateTimeImmutable($row['created_at']),
+            $row['password'],
+            new DateTimeImmutable($row['created']),
         );
     }
 }

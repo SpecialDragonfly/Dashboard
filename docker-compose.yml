@@ -6,6 +6,8 @@ services:
     volumes:
       - .:/var/www
     working_dir: /var/www
+    depends_on:
+      - db
 
   nginx:
     image: nginx:latest
@@ -17,3 +19,22 @@ services:
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - php
+
+  db:
+    image: mariadb:11
+    container_name: nqh_db
+    ports:
+      - "3306:3306"
+    environment:
+      MARIADB_DATABASE: notquitehuman
+      MARIADB_USER: notquitehuman
+      MARIADB_PASSWORD: notquitehuman
+      MARIADB_ROOT_PASSWORD: root
+    volumes:
+      - db_data:/var/lib/mysql
+      # Any .sql file dropped here is auto-loaded on first boot (empty data dir) only —
+      # put a mysqldump of the production schema/data here to seed local testing.
+      - ./docker/mariadb/init:/docker-entrypoint-initdb.d:ro
+
+volumes:
+  db_data:

@@ -1,5 +1,7 @@
 .idea/
 .phpunit.result.cache
+/docker/mariadb/init/*.sql
+/tmp/
 ###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php

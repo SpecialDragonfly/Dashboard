@@ -1,7 +1,28 @@
 # NotQuiteHuman — Rebuild Architecture
 
-**Date:** 2 April 2026  
-**Status:** Locked — ready to build
+**Date:** 2 April 2026 (original plan) — **implementation status updated 5 July 2026**
+**Status:** Locked (stack/principles) — actively building; sections 3, 4, 6, 12 below reflect actual code, not the original plan
+
+---
+
+## 0. Current Implementation Status (as of 2026-07-05)
+
+Everything below in sections 1–2 (stack, principles, structure) still holds. Sections 3 ("Routing"), 4 ("Services Wiring"), 6 ("Features"), and 12 ("Implementation Order") originally described the *plan* — they've been rewritten in place to match what's actually in the repo, since the real implementation has diverged in several ways:
+
+- **Dividends routing is RESTful, not action-named.** `config/routes.php` uses `/dividends/portfolio/{symbol}` (GET/POST/PUT/DELETE) instead of the originally planned `/add-symbol`, `/update-stock`, `/delete-stock`, `/latest-prices` style. `DividendController` methods are `portfolio`, `addStock`, `updateStock`, `deleteStock`, `prices`, `upcoming`, `addPayment`.
+- **Charts feature not started.** No `ChartController`, no `/charts*` routes, no `Domain/PortfolioItem.php`/`DividendPayment.php`. `StockQuote` (OHLC) already exists on `YahooFinanceService::getSymbolQuote()` in anticipation of it.
+- **Dividend calendar source changed.** Original plan scraped `dividenddata.co.uk`. Actual implementation is `SnowballAnalyticsService` (implements `DividendCalendarInterface`) hitting `snowball-analytics.com`'s public dividend-calendar API, paginated, 24h cache in `var/snowball-cache/`. Declared dividends are cross-referenced against a Freetrade-tradable-shares CSV (`var/freetrade-shares.csv`) in `DividendService::getUpcomingDividends()`.
+- **`OptionalAuthMiddleware` added** (not in original plan) — same token-lookup logic as `TokenAuthMiddleware` but never blocks the request; it just attaches `user` to the request attribute if a valid token is present. Used on `/` so the dashboard/homepage can render differently for anon vs logged-in without forcing a redirect.
+- **Auth is now hybrid cookie + Bearer, not pure localStorage.** `AuthController::login` sets both a JSON `token` in the response body *and* an `HttpOnly` cookie (`nqh_token`). `auth.js`'s `AuthManager` still stores the token in `localStorage` and sends it as `Authorization: Bearer`. Both `TokenAuthMiddleware` and `OptionalAuthMiddleware` check the `Bearer` header first, falling back to the `nqh_token` cookie.
+- **Repository/table naming differs slightly from the original plan:** it's `DividendRepository` (not `PortfolioRepository` + `SymbolRepository` as separate classes) — one repository backs both the `portfolio` and `symbols` tables, since `symbols` only tracks per-ticker Yahoo cache freshness (`last-checked`).
+- **Domain objects that exist today:** `BlogPost`, `RippedFile`, `Stock` (portfolio row), `StockQuote` (Yahoo OHLC), `User`. No `PortfolioItem` or `DividendPayment` domain classes yet — dividend payments are summed in SQL (`DividendRepository::getPortfolio()` does the `LEFT JOIN ... COALESCE(SUM(...))`), not hydrated as objects.
+- **A leftover/ahead-of-need test exists:** `tests/Service/ExDividendDateRegexTest.php` tests a regex for scraping ex-dividend dates out of Yahoo Finance HTML (`<span>Ex-Dividend Date</span><span>...</span>`). Nothing in `src/` currently uses this regex — it looks like a prepared-but-unwired scraper fallback, possibly for when the Snowball API is unavailable for a ticker. Worth checking before assuming it's dead code.
+- **Blog has an image upload endpoint** not in the original plan: `POST /blog/upload` (auth required, must be routed before `/blog/new`/`/blog/{slug}` in `config/routes.php` to avoid slug collision) — saves to `public/assets/uploads/`, validates MIME + extension, returns `{ url }` for use in the markdown editor.
+- **Ripper supports streaming, not just download.** `GET /ripper/stream/{videoId}` added alongside `/ripper/download/{videoId}` — serves `audio/mpeg` inline instead of forcing an attachment download. `RipperService` shells out to `yt-dlp`/`ffmpeg` via `exec()` with `escapeshellarg()`, and reconciles filesystem state (mp3/webp/json files dropping into `var/ripper/`) via `cleanup()`, called on every `getHistory()`.
+- **Dashboard widgets built so far:** `admin_links`, `blog`, `comics`, `economic`, `server_debugging`, `trading`, `way_of_paul` — all present in `templates/dashboard/_widgets/`.
+- **Migrations 001–006 applied** (SQLite, via `migrations/run.php`): `users`+`auth_tokens`, `blog_posts`, `ripped_files`, `portfolio`, `dividend_payments`, `symbols`.
+
+**Not yet built:** Charts feature entirely (controller, routes, templates, `charts.css`/`charts.js`). MySQL cutover (still SQLite `var/data.db`). No CSS/JS files exist yet for ripper/dividends beyond what's needed to render current templates — verify before assuming `ripper.css`/`dividends.css` exist.
 
 ---
 
@@ -122,60 +143,57 @@ notquitehuman.new/
 
 ---
 
-## 3. Routing (config/routes.php)
+## 3. Routing (config/routes.php) — actual, as implemented
 
-Auth-protected routes have `->add(TokenAuthMiddleware::class)` chained directly. Public routes have no middleware.
+Auth-protected routes have `->add(TokenAuthMiddleware::class)` chained directly. `/` uses `OptionalAuthMiddleware` (attaches user if present, never blocks). Public routes have no middleware. Charts routes from the original plan don't exist yet.
 
 ```php
 return function (App $app) {
+    // -- Housekeeping --
+    $app->get('/favicon.ico', function ($req, $res) { return $res->withStatus(204); });
+
     // -- Public --
-    $app->get('/',       [DashboardController::class, 'index']);
+    $app->get('/', [DashboardController::class, 'index'])->add(OptionalAuthMiddleware::class);
     $app->get('/login',  [AuthController::class, 'loginPage']);
     $app->post('/login', [AuthController::class, 'login']);
     $app->post('/logout',[AuthController::class, 'logout']);
 
     // -- Blog (public read) --
     $app->get('/blog',        [BlogController::class, 'index']);
-    $app->get('/blog/{slug}', [BlogController::class, 'show']);
 
-    // -- Dashboard (auth required) --
-    $app->get('/dashboard', [DashboardController::class, 'dashboard'])
-        ->add(TokenAuthMiddleware::class);
-
-    // -- Blog write (auth required) --
+    // -- Blog write (auth required) — /blog/new must come before /blog/{slug} --
+    $app->post('/blog/upload',      [BlogController::class, 'upload'])->add(TokenAuthMiddleware::class);
     $app->get('/blog/new',          [BlogController::class, 'create'])->add(TokenAuthMiddleware::class);
     $app->post('/blog/new',         [BlogController::class, 'create'])->add(TokenAuthMiddleware::class);
     $app->get('/blog/{slug}/edit',  [BlogController::class, 'edit'])->add(TokenAuthMiddleware::class);
     $app->post('/blog/{slug}/edit', [BlogController::class, 'edit'])->add(TokenAuthMiddleware::class);
     $app->delete('/blog/{slug}',    [BlogController::class, 'delete'])->add(TokenAuthMiddleware::class);
-
-    // -- Ripper (auth required) --
-    $app->get('/ripper',                        [RipperController::class, 'index'])->add(TokenAuthMiddleware::class);
-    $app->post('/rip',                          [RipperController::class, 'rip'])->add(TokenAuthMiddleware::class);
-    $app->get('/history',                       [RipperController::class, 'history'])->add(TokenAuthMiddleware::class);
-    $app->get('/ripper/download/{videoId}',     [RipperController::class, 'download'])->add(TokenAuthMiddleware::class);
+    $app->get('/blog/{slug}',       [BlogController::class, 'show']);
 
     // -- Dividends (auth required) --
-    $app->get('/dividends',          [DividendController::class, 'index'])->add(TokenAuthMiddleware::class);
-    $app->get('/portfolio',          [DividendController::class, 'getPortfolio'])->add(TokenAuthMiddleware::class);
-    $app->post('/add-symbol',        [DividendController::class, 'addSymbol'])->add(TokenAuthMiddleware::class);
-    $app->get('/upcoming-dividends', [DividendController::class, 'getUpcomingDividends'])->add(TokenAuthMiddleware::class);
-    $app->put('/update-stock',       [DividendController::class, 'updateStock'])->add(TokenAuthMiddleware::class);
-    $app->delete('/delete-stock',    [DividendController::class, 'deleteStock'])->add(TokenAuthMiddleware::class);
-    $app->get('/latest-prices',      [DividendController::class, 'getPrices'])->add(TokenAuthMiddleware::class);
-    $app->post('/add-dividend',      [DividendController::class, 'addDividend'])->add(TokenAuthMiddleware::class);
+    $app->get('/dividends',                       [DividendController::class, 'index'])->add(TokenAuthMiddleware::class);
+    $app->get('/dividends/portfolio',              [DividendController::class, 'portfolio'])->add(TokenAuthMiddleware::class);
+    $app->post('/dividends/portfolio',             [DividendController::class, 'addStock'])->add(TokenAuthMiddleware::class);
+    $app->put('/dividends/portfolio/{symbol}',     [DividendController::class, 'updateStock'])->add(TokenAuthMiddleware::class);
+    $app->delete('/dividends/portfolio/{symbol}',  [DividendController::class, 'deleteStock'])->add(TokenAuthMiddleware::class);
+    $app->get('/dividends/prices',                 [DividendController::class, 'prices'])->add(TokenAuthMiddleware::class);
+    $app->get('/dividends/upcoming',               [DividendController::class, 'upcoming'])->add(TokenAuthMiddleware::class);
+    $app->post('/dividends/payment',               [DividendController::class, 'addPayment'])->add(TokenAuthMiddleware::class);
 
-    // -- Charts (auth required) --
-    $app->get('/charts',          [ChartController::class, 'index'])->add(TokenAuthMiddleware::class);
-    $app->get('/charts/data',     [ChartController::class, 'getData'])->add(TokenAuthMiddleware::class);
-    $app->get('/charts/symbols',  [ChartController::class, 'getSymbols'])->add(TokenAuthMiddleware::class);
-    $app->get('/charts/in-range', [ChartController::class, 'inRange'])->add(TokenAuthMiddleware::class);
+    // -- Ripper (auth required) --
+    $app->get('/ripper',                    [RipperController::class, 'index'])->add(TokenAuthMiddleware::class);
+    $app->post('/rip',                      [RipperController::class, 'rip'])->add(TokenAuthMiddleware::class);
+    $app->get('/history',                   [RipperController::class, 'history'])->add(TokenAuthMiddleware::class);
+    $app->get('/ripper/download/{videoId}', [RipperController::class, 'download'])->add(TokenAuthMiddleware::class);
+    $app->get('/ripper/stream/{videoId}',   [RipperController::class, 'stream'])->add(TokenAuthMiddleware::class);
+
+    // -- Charts — NOT YET IMPLEMENTED --
 };
 ```
 
 ---
 
-## 4. Services Wiring (config/container.php)
+## 4. Services Wiring (config/container.php) — actual, as implemented
 
 Plain PHP-DI definitions. Every dependency is explicit — no autowiring.
 
@@ -204,56 +222,74 @@ return [
     },
 
     // -- Repositories --
-    UserRepository::class       => fn($c) => new UserRepository($c->get(PDO::class)),
-    BlogRepository::class       => fn($c) => new BlogRepository($c->get(PDO::class)),
-    RipperRepository::class     => fn($c) => new RipperRepository($c->get(PDO::class)),
-    PortfolioRepository::class  => fn($c) => new PortfolioRepository($c->get(PDO::class)),
-    SymbolRepository::class     => fn($c) => new SymbolRepository($c->get(PDO::class)),
+    // One DividendRepository backs both `portfolio` and `symbols` tables —
+    // there's no separate PortfolioRepository/SymbolRepository.
+    UserRepository::class     => fn(ContainerInterface $c) => new UserRepository($c->get(PDO::class)),
+    BlogRepository::class     => fn(ContainerInterface $c) => new BlogRepository($c->get(PDO::class)),
+    RipperRepository::class   => fn(ContainerInterface $c) => new RipperRepository($c->get(PDO::class)),
+    DividendRepository::class => fn(ContainerInterface $c) => new DividendRepository($c->get(PDO::class)),
 
     // -- Services --
-    AuthTokenService::class   => fn($c) => new AuthTokenService($c->get(PDO::class)),
-    BlogService::class        => fn($c) => new BlogService($c->get(BlogRepository::class)),
-    DividendService::class    => fn($c) => new DividendService($c->get(PortfolioRepository::class)),
-    RipperService::class      => fn($c) => new RipperService(
-        $c->get(RipperRepository::class),
-        dirname(__DIR__) . '/var/downloads/',
-        dirname(__DIR__) . '/public/assets/ripper/thumbnails/',
+    AuthTokenService::class => fn(ContainerInterface $c) => new AuthTokenService($c->get(PDO::class)),
+    BlogService::class      => fn(ContainerInterface $c) => new BlogService($c->get(BlogRepository::class)),
+    YahooFinanceService::class => fn(ContainerInterface $c) => new YahooFinanceService(
+        dirname(__DIR__) . '/var/yahoo-cache/',
+        $c->get(DividendRepository::class),
     ),
-    YahooFinanceService::class => fn($c) => new YahooFinanceService(
-        $c->get(SymbolRepository::class),
-        dirname(__DIR__) . '/var/cache/charts/',
+    // Declared-dividend calendar source — bound to Snowball Analytics today.
+    // Swap the DividendCalendarInterface binding to change source without touching DividendService.
+    SnowballAnalyticsService::class => fn(ContainerInterface $c) => new SnowballAnalyticsService(
+        dirname(__DIR__) . '/var/snowball-cache/',
+    ),
+    DividendCalendarInterface::class => fn(ContainerInterface $c) => $c->get(SnowballAnalyticsService::class),
+    DividendService::class  => fn(ContainerInterface $c) => new DividendService(
+        $c->get(DividendRepository::class),
+        $c->get(YahooFinanceService::class),
+        $c->get(DividendCalendarInterface::class),
+        dirname(__DIR__) . '/var/freetrade-shares.csv',
+    ),
+    RipperService::class    => fn(ContainerInterface $c) => new RipperService(
+        $c->get(RipperRepository::class),
+        dirname(__DIR__) . '/var/ripper/',
+        dirname(__DIR__) . '/public/assets/ripper/thumbnails/',
     ),
 
     // -- Middleware --
-    TokenAuthMiddleware::class => fn($c) => new TokenAuthMiddleware(
+    TokenAuthMiddleware::class => fn(ContainerInterface $c) => new TokenAuthMiddleware(
+        $c->get(AuthTokenService::class),
+        $c->get(UserRepository::class),
+    ),
+    // Attaches `user` to the request if a valid token is present, but never blocks —
+    // used on public routes (e.g. `/`) that render differently when logged in.
+    OptionalAuthMiddleware::class => fn(ContainerInterface $c) => new OptionalAuthMiddleware(
         $c->get(AuthTokenService::class),
         $c->get(UserRepository::class),
     ),
 
     // -- Controllers --
-    DashboardController::class => fn($c) => new DashboardController($c->get(Environment::class)),
-    AuthController::class      => fn($c) => new AuthController(
+    DashboardController::class => fn(ContainerInterface $c) => new DashboardController(
+        $c->get(Environment::class),
+        $c->get(BlogService::class),
+    ),
+    AuthController::class => fn(ContainerInterface $c) => new AuthController(
         $c->get(Environment::class),
         $c->get(UserRepository::class),
         $c->get(AuthTokenService::class),
     ),
-    BlogController::class      => fn($c) => new BlogController(
+    BlogController::class => fn(ContainerInterface $c) => new BlogController(
         $c->get(Environment::class),
         $c->get(BlogService::class),
     ),
-    RipperController::class    => fn($c) => new RipperController(
+    RipperController::class => fn(ContainerInterface $c) => new RipperController(
         $c->get(Environment::class),
         $c->get(RipperService::class),
     ),
-    DividendController::class  => fn($c) => new DividendController(
+    DividendController::class => fn(ContainerInterface $c) => new DividendController(
         $c->get(Environment::class),
         $c->get(DividendService::class),
-        $c->get(YahooFinanceService::class),
     ),
-    ChartController::class     => fn($c) => new ChartController(
-        $c->get(Environment::class),
-        $c->get(YahooFinanceService::class),
-    ),
+
+    // -- ChartController — NOT YET IMPLEMENTED --
 ];
 ```
 
@@ -295,21 +331,21 @@ That's it for now. No blog comments, no categories table — keep it lean. Tags 
 
 ## 6. Features — What's In, What's Out
 
-### ✅ In (v1)
+### ✅ In (v1) — build status as of 2026-07-05
 
-| Feature | Source | Notes |
+| Feature | Source | Status |
 |---|---|---|
-| Dashboard | Prototype design | Widget grid, glassmorphism, gradient bg |
-| Dashboard widgets | Existing (hardcoded) | Trading knowledge, economic indicators, server debugging, Way of Paul — as Twig partials |
-| Dragonfly logo | Existing JS | `dragonfly.js` + `dragonfly-points.js` copied byte-for-byte |
-| Christmas countdown | Existing + prototype | Counter in header |
-| Days employed counter | Existing + prototype | Counter in header (start: **2024-05-28**) |
-| Blog | New | Public by default, hidden posts for auth-only, markdown content, tags |
-| Web Comics links | Prototype | Static links with icons |
-| YouTube Ripper | Existing (as-is) | Port logic into Slim controllers, revisit later |
-| Portfolio/Dividends | Existing (as-is) | Port logic into Slim controllers, revisit later |
-| Charts | Existing (as-is) | Port logic, keep vendored Chart.js |
-| Auth (token-based) | Existing | Carried forward — PSR-15 `TokenAuthMiddleware` |
+| Dashboard | Prototype design | **Built** — widget grid, `OptionalAuthMiddleware` for anon/logged-in rendering |
+| Dashboard widgets | Existing (hardcoded) | **Built** — `admin_links`, `blog`, `comics`, `economic`, `server_debugging`, `trading`, `way_of_paul` partials |
+| Dragonfly logo | Existing JS | **Built** — copied byte-for-byte |
+| Christmas countdown | Existing + prototype | **Built** — `AbstractController::baseVars()` |
+| Days employed counter | Existing + prototype | **Built** — start: **2024-05-28**, `AbstractController::baseVars()` |
+| Blog | New | **Built** — CRUD, markdown via `league/commonmark`, tags, published toggle, image upload (`/blog/upload`) |
+| Web Comics links | Prototype | **Built** — as `comics.html.twig` widget |
+| YouTube Ripper | Existing (as-is) | **Built** — rip/history/download + streaming (`/ripper/stream/{videoId}`) |
+| Portfolio/Dividends | Existing (as-is) | **Built** — RESTful routes, calendar source swapped to Snowball Analytics (see §0) |
+| Charts | Existing (as-is) | **Not started** — no controller, routes, or templates yet |
+| Auth (token-based) | Existing | **Built** — hybrid Bearer header + `HttpOnly` cookie (see §0) |
 
 ### ❌ Out
 
@@ -523,19 +559,21 @@ These files are sacred. Copy them exactly:
 
 ---
 
-## 12. Implementation Order
+## 12. Implementation Order — progress as of 2026-07-05
 
-1. **Scaffold** — `composer init`, add Slim 4 + PHP-DI + Twig + phpdotenv
-2. **Config** — `config/routes.php`, `config/container.php`, `config/middleware.php`, `.env`, PDO (SQLite)
-3. **Docker** — docker-compose.yml (PHP-FPM + Nginx + existing MySQL), Dockerfile
-4. **Base template** — Twig layout with header, dragonfly, counters, Feather Icons
-5. **Auth** — Login page, TokenAuthenticator, /login + /logout routes
-6. **Dashboard** — Widget grid with hardcoded Twig partials (prototype CSS), APOD widget, comics links
-7. **Blog** — SQL migration, domain object, repository, service, controller, templates
-8. **Ripper** — Port existing logic into Symfony controller/service
-9. **Dividends** — Port existing logic
-10. **Charts** — Port existing logic
-11. **Polish** — Responsive CSS, error pages, cleanup
+1. ✅ **Scaffold** — `composer init`, add Slim 4 + PHP-DI + Twig + phpdotenv
+2. ✅ **Config** — `config/routes.php`, `config/container.php`, `config/middleware.php`, `.env`, PDO (SQLite)
+3. 🟡 **Docker** — `docker-compose.yml` + `Dockerfile` exist; still pointed at SQLite, not the existing MySQL DB
+4. ✅ **Base template** — Twig layout with header, dragonfly, counters, Feather Icons
+5. ✅ **Auth** — Login page, `AuthTokenService`, `/login` + `/logout` (now hybrid cookie + Bearer, see §0)
+6. ✅ **Dashboard** — Widget grid with hardcoded Twig partials, comics links (APOD widget not confirmed — check `dashboard/index.html.twig` before assuming)
+7. ✅ **Blog** — SQL migration, domain object, repository, service, controller, templates, image upload
+8. ✅ **Ripper** — Ported into Slim controller/service, plus streaming endpoint
+9. ✅ **Dividends** — Ported, RESTful routes, calendar source swapped to Snowball Analytics
+10. ❌ **Charts** — Not started
+11. ❌ **Polish** — Responsive CSS, error pages, cleanup — not assessed; no test suite/linter configured per `CLAUDE.md`
+
+**Next logical steps:** (a) Charts feature (controller + routes + `ChartController` wiring + templates/JS using vendored Chart.js), (b) MySQL cutover for Docker/production, (c) decide whether `ExDividendDateRegexTest`'s scraper regex needs a home in `src/` or should be deleted as dead code.
 
 ---
 

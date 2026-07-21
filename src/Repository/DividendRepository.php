@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Domain\Stock;
 use PDO;
+use PDOException;
 
 class DividendRepository
 {
@@ -101,13 +102,25 @@ SQL;
 
     public function upsertSymbolLastChecked(string $ticker, int $time): void
     {
-        $stmt = $this->db->prepare(
-            'INSERT INTO symbols (ticker, "last-checked") VALUES (:ticker, :time)
-             ON CONFLICT(ticker) DO UPDATE SET "last-checked" = excluded."last-checked"'
-        );
-        $stmt->bindValue(':ticker', $ticker);
-        $stmt->bindValue(':time', $time);
-        $stmt->execute();
+        // Plain PDO upsert, portable across SQLite/MySQL: try the insert, and
+        // on a unique-constraint hit (ticker already exists) update instead.
+        // Avoids SQLite's ON CONFLICT (no MySQL equivalent) and MySQL's
+        // ON DUPLICATE KEY UPDATE (no SQLite equivalent).
+        $insert = $this->db->prepare('INSERT INTO symbols (ticker, "last-checked") VALUES (:ticker, :time)');
+        $insert->bindValue(':ticker', $ticker);
+        $insert->bindValue(':time', $time);
+
+        try {
+            $insert->execute();
+        } catch (PDOException $e) {
+            if ($e->getCode() !== '23000') {
+                throw $e;
+            }
+            $update = $this->db->prepare('UPDATE symbols SET "last-checked" = :time WHERE ticker = :ticker');
+            $update->bindValue(':ticker', $ticker);
+            $update->bindValue(':time', $time);
+            $update->execute();
+        }
     }
 
     private function hydrateStock(array $row): Stock

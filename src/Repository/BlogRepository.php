@@ -58,12 +58,15 @@ class BlogRepository
     public function update(int $id, string $title, string $slug, string $content, ?string $tags, bool $published): void
     {
         $stmt = $this->db->prepare(
-            "UPDATE blog_posts
-             SET title = ?, slug = ?, content = ?, tags = ?, published = ?,
-                 updated_at = datetime('now')
-             WHERE id = ?"
+            'UPDATE blog_posts
+             SET title = ?, slug = ?, content = ?, tags = ?, published = ?, updated_at = ?
+             WHERE id = ?'
         );
-        $stmt->execute([$title, $slug, $content, $tags, (int) $published, $id]);
+        $stmt->execute([
+            $title, $slug, $content, $tags, (int) $published,
+            (new DateTimeImmutable())->format('Y-m-d H:i:s'),
+            $id,
+        ]);
     }
 
     public function delete(int $id): void
