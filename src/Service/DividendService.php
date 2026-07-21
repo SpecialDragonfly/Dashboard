@@ -64,6 +64,39 @@ class DividendService
         return $results;
     }
 
+    /**
+     * Lazily ensure today's portfolio value snapshot has a row per portfolio
+     * symbol. Partial commit: each symbol succeeds or fails independently —
+     * a failure is logged and skipped (leaving no row, retried next call)
+     * rather than aborting the whole snapshot.
+     */
+    public function ensureTodaySnapshot(): void
+    {
+        $portfolio = $this->repo->getPortfolio();
+        $today     = date('Y-m-d');
+        $done      = array_flip($this->repo->getSnapshottedSymbolsForDate($today));
+
+        foreach ($portfolio as $stock) {
+            if (isset($done[$stock->getSymbol()])) {
+                continue;
+            }
+
+            try {
+                $quote = $this->yahoo->getSymbolQuote($stock->getSymbol());
+                $this->repo->insertValueSnapshot($today, $stock->getSymbol(), $stock->getQuantity(), $quote->getPrice());
+            } catch (Throwable $e) {
+                error_log("[Charts] Failed to snapshot {$stock->getSymbol()}: " . $e->getMessage());
+            }
+        }
+    }
+
+    /** @return array[] Each entry: ['date' => string, 'value' => float] */
+    public function getPortfolioGrowth(): array
+    {
+        $this->ensureTodaySnapshot();
+        return $this->repo->getGrowthHistory();
+    }
+
     private function freetradeSymbols(): array
     {
         $csv = file_get_contents($this->freetradeCsvPath);

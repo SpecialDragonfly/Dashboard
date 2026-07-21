@@ -1,0 +1,37 @@
+.charts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.charts-header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+/* Two-column layout: left = portfolio + upcoming tables, right = chart panel.
+   .card / .table-wrap / .portfolio-table / th.num,td.num / tr.active-row /
+   .empty-state / .loading / .chart-header are reused from dividends.css
+   (linked alongside this file) — no redefinitions here. */
+
+.charts-columns {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.charts-left {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.charts-right {
+    flex: 1.4;
+    min-width: 0;
+}
+
+#price-chart {
+    height: 340px;
+}

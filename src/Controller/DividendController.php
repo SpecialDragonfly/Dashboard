@@ -30,10 +30,9 @@ class DividendController extends AbstractController
 
     public function addStock(Request $request, Response $response, array $args): Response
     {
-        $body    = (array) $request->getParsedBody();
-        $pattern = '/[^A-Za-z0-9 .\-_]/';
-        $symbol  = preg_replace($pattern, '', $body['symbol'] ?? '');
-        $name    = preg_replace($pattern, '', $body['name']   ?? '');
+        $body = (array) $request->getParsedBody();
+        $symbol = strtoupper(preg_replace('/[^A-Za-z0-9.\-_]/', '', $body['symbol'] ?? ''));
+        $name = preg_replace('/[^A-Za-z0-9 &\'().,\-_]/', '', $body['name'] ?? '');
         $qty     = (float) ($body['quantity'] ?? 0);
         $price   = (float) ($body['price']    ?? 0);
 

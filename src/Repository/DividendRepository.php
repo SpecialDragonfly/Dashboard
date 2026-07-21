@@ -123,6 +123,51 @@ SQL;
         }
     }
 
+    /** @return string[] */
+    public function getSnapshottedSymbolsForDate(string $date): array
+    {
+        $stmt = $this->db->prepare('SELECT symbol FROM portfolio_value_history WHERE date = :date');
+        $stmt->bindValue(':date', $date);
+        $stmt->execute();
+        return array_column($stmt->fetchAll(), 'symbol');
+    }
+
+    public function insertValueSnapshot(string $date, string $symbol, float $quantity, float $marketPrice): void
+    {
+        $stmt = $this->db->prepare(
+            'INSERT INTO portfolio_value_history (date, symbol, quantity, market_price, value)
+             VALUES (:date, :symbol, :quantity, :marketPrice, :value)'
+        );
+        $stmt->bindValue(':date', $date);
+        $stmt->bindValue(':symbol', $symbol);
+        $stmt->bindValue(':quantity', $quantity);
+        $stmt->bindValue(':marketPrice', $marketPrice);
+        $stmt->bindValue(':value', $quantity * $marketPrice);
+
+        try {
+            $stmt->execute();
+        } catch (PDOException $e) {
+            if ($e->getCode() !== '23000') {
+                throw $e;
+            }
+            // Row for this date+symbol already exists (race with a concurrent
+            // snapshot request) — same effect as SQLite's "INSERT OR IGNORE".
+        }
+    }
+
+    /** @return array[] Each entry: ['date' => string, 'value' => float] */
+    public function getGrowthHistory(): array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT date, SUM(value) AS value FROM portfolio_value_history GROUP BY date ORDER BY date ASC'
+        );
+        $stmt->execute();
+        return array_map(
+            fn(array $row) => ['date' => $row['date'], 'value' => (float) $row['value']],
+            $stmt->fetchAll(),
+        );
+    }
+
     private function hydrateStock(array $row): Stock
     {
         return new Stock(

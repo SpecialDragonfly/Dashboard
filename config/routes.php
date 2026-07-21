@@ -2,6 +2,7 @@
 
 use App\Controller\AuthController;
 use App\Controller\BlogController;
+use App\Controller\ChartsController;
 use App\Controller\DashboardController;
 use App\Controller\DividendController;
 use App\Controller\RipperController;
@@ -40,6 +41,10 @@ return function (App $app) {
     $app->get('/dividends/prices',                  [DividendController::class, 'prices'])->add(TokenAuthMiddleware::class);
     $app->get('/dividends/upcoming',                [DividendController::class, 'upcoming'])->add(TokenAuthMiddleware::class);
     $app->post('/dividends/payment',                [DividendController::class, 'addPayment'])->add(TokenAuthMiddleware::class);
+
+    // -- Charts (auth required) --
+    $app->get('/charts',        [ChartsController::class, 'index'])->add(TokenAuthMiddleware::class);
+    $app->get('/charts/growth', [ChartsController::class, 'growth'])->add(TokenAuthMiddleware::class);
 
     // -- Ripper (auth required) --
     $app->get('/ripper',                      [RipperController::class, 'index'])->add(TokenAuthMiddleware::class);
