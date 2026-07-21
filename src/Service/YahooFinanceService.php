@@ -89,7 +89,6 @@ class YahooFinanceService
         ]);
         $crumb  = curl_exec($ch);
         $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
 
         return [$crumb, $status];
     }
@@ -116,7 +115,6 @@ class YahooFinanceService
         $body   = curl_exec($ch);
         $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $err    = curl_error($ch);
-        curl_close($ch);
 
         return [$body, $status, $err];
     }
@@ -145,7 +143,6 @@ class YahooFinanceService
             CURLOPT_USERAGENT      => self::USER_AGENT,
         ]);
         curl_exec($ch);
-        curl_close($ch);
 
         [$crumb, $status] = $this->requestCrumb([CURLOPT_COOKIEJAR => $cookieFile, CURLOPT_COOKIEFILE => $cookieFile]);
 

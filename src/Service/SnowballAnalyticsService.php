@@ -55,7 +55,6 @@ class SnowballAnalyticsService implements DividendCalendarInterface
             );
             $body = curl_exec($ch);
             $status = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
 
             if ($body === false || $status !== 200) {
                 error_log("[Snowball] HTTP $status on page $page");
