@@ -4,8 +4,6 @@
 
 This is a Slim 4 rebuild of the NotQuiteHuman web application. The project is in active scaffolding — architecture is locked and documented in `ARCHITECTURE.md`. Read that file first for full context on planned structure, routes, and service wiring before implementing features.
 
-There is currently no test suite or linter configured.
-
 ## Architecture Principles
 
 **This codebase is intentionally explicit and low-magic. Do not introduce convenience abstractions without good reason.**

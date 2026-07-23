@@ -53,8 +53,6 @@ a:hover { text-decoration: underline; }
 
 .dragonfly-canvas {
     transform: rotate(90deg);
-    background: #1a1a2e;
-    border: 2px solid rgba(102, 126, 234, 0.3);
     border-radius: 6px;
     flex-shrink: 0;
 }
@@ -64,6 +62,7 @@ a:hover { text-decoration: underline; }
     font-weight: 600;
     letter-spacing: -0.02em;
     white-space: nowrap;
+    margin-left:10px;
 }
 
 .header-nav {
