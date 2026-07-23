@@ -51,7 +51,7 @@ function renderPortfolioTable() {
 
     tbody.innerHTML = portfolioData.map(stock => {
         const q = priceData.get(stock.symbol);
-        const priceCell = q ? formatPrice(q.price) : '<span class="loading">…</span>';
+        const priceCell = q ? formatPrice(q.price) + priceIndicator(q.price, stock.price) : '<span class="loading">…</span>';
         const checkedCell = q ? formatChecked(q.lastChecked) : '—';
         const activeClass = activeSymbol === stock.symbol ? ' active-row' : '';
 
@@ -364,6 +364,18 @@ function formatDividendAmount(amount, currency) {
 
 function formatPrice(p) {
     return (Math.round(p * 100) / 100).toFixed(2);
+}
+
+// Compares live price against average cost paid, within a penny to absorb rounding.
+function priceIndicator(current, avg) {
+    if (avg == null || avg === 0) return '';
+    const diff = current - avg;
+    if (Math.abs(diff) < 0.005) {
+        return '<span class="price-indicator price-flat" title="At average cost">=</span>';
+    }
+    const up = diff > 0;
+    const label = up ? 'Above' : 'Below';
+    return `<span class="price-indicator ${up ? 'price-up' : 'price-down'}" title="${label} average cost (${formatPrice(avg)}p)">${up ? '▲' : '▼'}</span>`;
 }
 
 function formatChecked(ts) {
