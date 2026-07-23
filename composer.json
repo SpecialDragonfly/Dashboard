@@ -11,6 +11,7 @@
         "slim/slim": "^4.14",
         "twig/twig": "^3.24",
         "vlucas/phpdotenv": "^5.6",
+        "robmorgan/phinx": "^0.13.4",
         "ext-curl": "*",
         "ext-pdo": "*"
     },
@@ -29,7 +30,6 @@
     },
     "require-dev": {
         "phpstan/phpstan": "^2.2",
-        "phpunit/phpunit": "^11",
-        "robmorgan/phinx": "^0.16.12"
+        "phpunit/phpunit": "^11"
     }
 }
