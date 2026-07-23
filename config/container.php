@@ -109,7 +109,7 @@ return [
         containerGet($c, DividendRepository::class),
         containerGet($c, YahooFinanceService::class),
         containerGet($c, DividendCalendarInterface::class),
-        dirname(__DIR__) . '/var/freetrade-shares.csv',
+        dirname(__DIR__) . '/src/Dividends/freetrade-shares.csv',
     ),
     RipperService::class    => fn(ContainerInterface $c) => new RipperService(
         containerGet($c, RipperRepository::class),
