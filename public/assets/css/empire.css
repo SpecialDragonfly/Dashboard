@@ -72,7 +72,7 @@
 }
 
 .empire-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--glass-bg);
 }
 
 .empire-table tbody tr:nth-child(even) {

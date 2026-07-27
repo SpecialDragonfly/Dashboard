@@ -2,6 +2,8 @@
 .phpunit.result.cache
 /docker/mariadb/init/*.sql
 /tmp/
+/public/assets/ripper/thumbnails/*
+!/public/assets/ripper/thumbnails/.gitkeep
 ###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php

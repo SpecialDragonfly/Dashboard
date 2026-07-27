@@ -63,7 +63,7 @@
 }
 
 .portfolio-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--glass-bg);
 }
 
 .portfolio-table tbody tr.active-row {
@@ -86,11 +86,11 @@
 }
 
 .price-up {
-    color: #6bcb77;
+    color: var(--positive);
 }
 
 .price-down {
-    color: #e05c6a;
+    color: var(--danger);
 }
 
 .price-flat {
@@ -103,7 +103,7 @@
 }
 
 .last-checked-stale {
-    color: #e0a050;
+    color: var(--stale);
 }
 
 .exdiv-cell,
@@ -130,7 +130,7 @@
 
 .received-cell {
     font-variant-numeric: tabular-nums;
-    color: #6bcb77;
+    color: var(--positive);
 }
 
 .delete-btn {
@@ -145,7 +145,7 @@
 }
 
 .delete-btn:hover {
-    background: rgba(224, 92, 106, 0.12);
+    background: var(--danger-tint-12);
 }
 
 /* Add stock form */
@@ -215,7 +215,7 @@
 }
 
 .add-payment-form select option {
-    background: #1a1a2e;
+    background: var(--bg-end);
 }
 
 /* Upcoming dividends */
@@ -288,9 +288,9 @@
     font-size: 0.72rem;
     padding: 0.1rem 0.4rem;
     border-radius: 4px;
-    background: rgba(107, 203, 119, 0.15);
-    border: 1px solid rgba(107, 203, 119, 0.3);
-    color: #6bcb77;
+    background: var(--positive-tint-15);
+    border: 1px solid var(--positive-tint-30);
+    color: var(--positive);
     margin-left: 0.4rem;
     vertical-align: middle;
 }

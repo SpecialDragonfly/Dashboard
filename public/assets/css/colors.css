@@ -8,6 +8,7 @@
     --accent-2: #16a34a;
     --glass-bg: rgba(255, 255, 255, 0.04);
     --glass-border: rgba(255, 255, 255, 0.08);
+    --header-bg: rgba(15, 20, 16, 0.7);
     --text:     #e8e8f0;
     --text-muted: #8888aa;
     --danger:   #e05c6a;
@@ -23,6 +24,19 @@
     /* Lighter accent companions, for text sitting on dark backgrounds */
     --accent-light:   #86efac;
     --accent-lighter: #bbf7d0;
+
+    /* Danger tints (explicit alpha steps of --danger, rgb 224, 92, 106) */
+    --danger-tint-10: rgba(224, 92, 106, 0.10);
+    --danger-tint-12: rgba(224, 92, 106, 0.12);
+    --danger-tint-15: rgba(224, 92, 106, 0.15);
+    --danger-tint-30: rgba(224, 92, 106, 0.30);
+    --danger-light: #f08090;
+
+    /* Financial gain/loss and status colours (dividends.css) */
+    --positive:      #6bcb77;
+    --positive-tint-15: rgba(107, 203, 119, 0.15);
+    --positive-tint-30: rgba(107, 203, 119, 0.30);
+    --stale:         #e0a050;
 
     /* Potion-quiz palette (quiz.html, identify.html) */
     --quiz-bg:     #161d19;

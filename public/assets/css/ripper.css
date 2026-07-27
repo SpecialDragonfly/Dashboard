@@ -40,7 +40,7 @@
 }
 
 .rip-status--info  { background: var(--accent-tint-15); color: var(--accent-light); }
-.rip-status--error { background: rgba(239, 68, 68, 0.15);   color: #fca5a5; }
+.rip-status--error { background: var(--danger-tint-15);     color: var(--danger-light); }
 
 .history-grid {
     display: flex;
