@@ -2,13 +2,13 @@
 
 :root {
     /* Site palette */
-    --bg-start: #0a1210;
-    --bg-end:   #1c2a19;
-    --accent:   #4ade80;
-    --accent-2: #16a34a;
+    --bg-start: #08110f;
+    --bg-end:   #162311;
+    --accent:   #707627;
+    --accent-2: #3d4015;
     --glass-bg: rgba(255, 255, 255, 0.04);
     --glass-border: rgba(255, 255, 255, 0.08);
-    --header-bg: #074707;
+    --header-bg: #2b3a18;
     --text:     #e8e8f0;
     --text-muted: #8888aa;
     --danger:   #e05c6a;
