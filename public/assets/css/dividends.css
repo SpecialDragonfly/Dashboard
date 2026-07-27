@@ -67,7 +67,7 @@
 }
 
 .portfolio-table tbody tr.active-row {
-    background: rgba(102, 126, 234, 0.08);
+    background: var(--accent-tint-08);
 }
 
 .stock-symbol {
@@ -252,8 +252,8 @@
     font-size: 0.75rem;
     padding: 0.2rem 0.6rem;
     border-radius: 99px;
-    background: rgba(102, 126, 234, 0.15);
-    border: 1px solid rgba(102, 126, 234, 0.3);
+    background: var(--accent-tint-15);
+    border: 1px solid var(--accent-tint-30);
     color: var(--accent);
 }
 

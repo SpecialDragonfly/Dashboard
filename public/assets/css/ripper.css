@@ -29,7 +29,7 @@
 }
 
 .rip-form input[type="text"]:focus {
-    border-color: rgba(102, 126, 234, 0.6);
+    border-color: var(--accent-tint-60);
 }
 
 .rip-status {
@@ -39,7 +39,7 @@
     margin-bottom: 1.5rem;
 }
 
-.rip-status--info  { background: rgba(102, 126, 234, 0.15); color: #a5b4fc; }
+.rip-status--info  { background: var(--accent-tint-15); color: var(--accent-light); }
 .rip-status--error { background: rgba(239, 68, 68, 0.15);   color: #fca5a5; }
 
 .history-grid {

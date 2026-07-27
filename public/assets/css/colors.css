@@ -1,0 +1,42 @@
+/* Single source of truth for colour values used across the site. */
+
+:root {
+    /* Site palette */
+    --bg-start: #0f0f1a;
+    --bg-end:   #1a1a2e;
+    --accent:   #4ade80;
+    --accent-2: #16a34a;
+    --glass-bg: rgba(255, 255, 255, 0.04);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --text:     #e8e8f0;
+    --text-muted: #8888aa;
+    --danger:   #e05c6a;
+
+    /* Accent tints (explicit alpha steps of --accent, rgb 74, 222, 128) */
+    --accent-tint-08: rgba(74, 222, 128, 0.08);
+    --accent-tint-12: rgba(74, 222, 128, 0.12);
+    --accent-tint-15: rgba(74, 222, 128, 0.15);
+    --accent-tint-20: rgba(74, 222, 128, 0.20);
+    --accent-tint-30: rgba(74, 222, 128, 0.30);
+    --accent-tint-60: rgba(74, 222, 128, 0.60);
+
+    /* Lighter accent companions, for text sitting on dark backgrounds */
+    --accent-light:   #86efac;
+    --accent-lighter: #bbf7d0;
+
+    /* Potion-quiz palette (quiz.html, identify.html) */
+    --quiz-bg:     #14141f;
+    --quiz-card:   #1e1e2e;
+    --quiz-border: #33334a;
+    --quiz-text:   #e8e8f0;
+    --quiz-muted:  #9090a8;
+
+    --quiz-accent:      #2dd4bf;
+    --quiz-accent-tint-12: rgba(45, 212, 191, 0.12);
+
+    --quiz-correct:      #4caf6d;
+    --quiz-correct-tint-15: rgba(76, 175, 109, 0.15);
+
+    --quiz-wrong:      #e0596a;
+    --quiz-wrong-tint-15: rgba(224, 89, 106, 0.15);
+}

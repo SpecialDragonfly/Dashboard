@@ -1,13 +1,4 @@
 :root {
-    --bg-start: #0f0f1a;
-    --bg-end:   #1a1a2e;
-    --accent:   #667eea;
-    --accent-2: #764ba2;
-    --glass-bg: rgba(255, 255, 255, 0.04);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --text:     #e8e8f0;
-    --text-muted: #8888aa;
-    --danger:   #e05c6a;
     --font:     'Inter', system-ui, sans-serif;
     --radius:   12px;
 }

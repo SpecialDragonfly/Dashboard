@@ -4,16 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>What Goes Into That Potion?</title>
+<link rel="stylesheet" href="/assets/css/colors.css">
 <style>
     :root {
-        --bg: #14141f;
-        --card: #1e1e2e;
-        --border: #33334a;
-        --text: #e8e8f0;
-        --muted: #9090a8;
-        --accent: #7c8cf0;
-        --correct: #4caf6d;
-        --wrong: #e0596a;
+        --bg: var(--quiz-bg);
+        --card: var(--quiz-card);
+        --border: var(--quiz-border);
+        --text: var(--quiz-text);
+        --muted: var(--quiz-muted);
+        --accent: var(--quiz-accent);
+        --correct: var(--quiz-correct);
+        --wrong: var(--quiz-wrong);
         font-family: system-ui, sans-serif;
     }
     * { box-sizing: border-box; }
@@ -70,18 +71,18 @@
         -webkit-tap-highlight-color: transparent;
     }
     .choice:hover:not(:disabled) {
-        background: rgba(124, 140, 240, 0.12);
+        background: var(--quiz-accent-tint-12);
         border-color: var(--accent);
     }
     .choice:disabled {
         cursor: default;
     }
     .choice.correct {
-        background: rgba(76, 175, 109, 0.15);
+        background: var(--quiz-correct-tint-15);
         border-color: var(--correct);
     }
     .choice.wrong {
-        background: rgba(224, 89, 106, 0.15);
+        background: var(--quiz-wrong-tint-15);
         border-color: var(--wrong);
     }
     .actions {

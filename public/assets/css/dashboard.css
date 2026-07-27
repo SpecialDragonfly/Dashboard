@@ -56,10 +56,10 @@
 }
 
 code {
-    background: rgba(102, 126, 234, 0.15);
+    background: var(--accent-tint-15);
     padding: 0.1em 0.35em;
     border-radius: 4px;
-    color: #a0b4f0;
+    color: var(--accent-light);
 }
 
 .widget-list--links a {
