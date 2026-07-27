@@ -106,7 +106,7 @@ class RipperRepository
         if ($path !== null && !is_string($path)) {
             throw new RuntimeException('Unexpected type for ripped_files.path');
         }
-        if (!is_string($created)) {
+        if ($created !== null && !is_string($created)) {
             throw new RuntimeException('Unexpected type for ripped_files.created');
         }
 
@@ -117,7 +117,7 @@ class RipperRepository
             $title,
             $thumbnail,
             $path,
-            new DateTimeImmutable($created),
+            $created !== null ? new DateTimeImmutable($created) : null,
         );
     }
 }
