@@ -1,0 +1,37 @@
+{% macro money(totalRings) -%}
+    {%- set thrones = totalRings // 160 -%}
+    {%- set remainder = totalRings % 160 -%}
+    {%- set crowns = remainder // 20 -%}
+    {%- set rings = remainder % 20 -%}
+    {%- set parts = [] -%}
+    {%- if thrones > 0 %}{% set parts = parts|merge([thrones ~ 'T']) %}{% endif -%}
+    {%- if crowns > 0 %}{% set parts = parts|merge([crowns ~ 'C']) %}{% endif -%}
+    {%- if rings > 0 or parts is empty %}{% set parts = parts|merge([rings ~ 'R']) %}{% endif -%}
+    {{- parts|join(' ') -}}
+{%- endmacro %}
+
+{#
+    Rounds to the nearest Ring coin in circulation (1s and 5s): the Ring
+    remainder rounds to the nearest 5, carrying into a Crown on a round-up
+    to 20. Crowns are left as-is.
+#}
+{% macro roundedMoney(totalRings) -%}
+    {%- set thrones = totalRings // 160 -%}
+    {%- set remainder = totalRings % 160 -%}
+    {%- set crowns = remainder // 20 -%}
+    {%- set rings = remainder % 20 -%}
+    {%- set rings = ((rings + 2) // 5) * 5 -%}
+    {%- if rings >= 20 -%}
+        {%- set crowns = crowns + 1 -%}
+        {%- set rings = 0 -%}
+    {%- endif -%}
+    {%- if crowns >= 8 -%}
+        {%- set thrones = thrones + 1 -%}
+        {%- set crowns = 0 -%}
+    {%- endif -%}
+    {%- set parts = [] -%}
+    {%- if thrones > 0 %}{% set parts = parts|merge([thrones ~ 'T']) %}{% endif -%}
+    {%- if crowns > 0 %}{% set parts = parts|merge([crowns ~ 'C']) %}{% endif -%}
+    {%- if rings > 0 or parts is empty %}{% set parts = parts|merge([rings ~ 'R']) %}{% endif -%}
+    {{- parts|join(' ') -}}
+{%- endmacro %}

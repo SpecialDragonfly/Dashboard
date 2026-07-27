@@ -5,6 +5,7 @@ use App\Controller\BlogController;
 use App\Controller\ChartsController;
 use App\Controller\DashboardController;
 use App\Controller\DividendController;
+use App\Controller\EmpireController;
 use App\Controller\RipperController;
 use App\Middleware\OptionalAuthMiddleware;
 use App\Middleware\TokenAuthMiddleware;
@@ -21,6 +22,10 @@ return function (App $app) {
     $app->get('/login',  [AuthController::class, 'loginPage']);
     $app->post('/login', [AuthController::class, 'login']);
     $app->post('/logout',[AuthController::class, 'logout']);
+
+    // -- Empire (public) --
+    $app->get('/empire',              [EmpireController::class, 'index']);
+    $app->get('/empire/print/{table}', [EmpireController::class, 'print']);
 
     // -- Blog (public read) --
     $app->get('/blog',        [BlogController::class, 'index']);

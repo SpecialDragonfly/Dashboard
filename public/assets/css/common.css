@@ -240,3 +240,7 @@ a:hover { text-decoration: underline; }
 
 /* Utility */
 .empty-state { color: var(--text-muted); font-style: italic; margin-top: 2rem; }
+
+@media print {
+    .no-print { display: none !important; }
+}

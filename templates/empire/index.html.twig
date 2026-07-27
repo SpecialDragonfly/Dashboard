@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Empire — NotQuiteHuman{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="/assets/css/empire.css">
+{% endblock %}
+
+{% block body %}
+<div class="empire-container">
+    <div class="empire-header">
+        <h1>Empire</h1>
+    </div>
+
+    <p>
+        The currency of Empire is denominated in <strong>Rings</strong>, <strong>Crowns</strong> and
+        <strong>Thrones</strong>: 20 Rings to a Crown, and 8 Crowns to a Throne (160 Rings to a Throne).
+    </p>
+
+    <div class="empire-table-links">
+        <a href="/empire/print/ring" class="btn btn-primary">
+            <i data-feather="grid"></i> Ring prices
+        </a>
+        <a href="/empire/print/rounded" class="btn btn-primary">
+            <i data-feather="grid"></i> Rounded prices
+        </a>
+    </div>
+</div>
+{% endblock %}

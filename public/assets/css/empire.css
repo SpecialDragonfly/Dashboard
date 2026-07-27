@@ -1,0 +1,139 @@
+.empire-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.empire-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+
+.empire-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+}
+
+.empire-container h2 {
+    margin: 2rem 0 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.empire-table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.empire-table-header h2 {
+    margin: 2rem 0 1rem;
+}
+
+.empire-table-links {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.table-wrap {
+    overflow-x: auto;
+    margin-bottom: 1.25rem;
+}
+
+.empire-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.empire-table th,
+.empire-table td {
+    padding: 0.55rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--glass-border);
+    white-space: nowrap;
+}
+
+.empire-table th {
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.empire-table th.num,
+.empire-table td.num {
+    text-align: right;
+}
+
+.empire-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.empire-table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.025);
+}
+
+@media print {
+    @page {
+        size: A4 landscape;
+        margin: 1cm;
+    }
+
+    body {
+        background: #fff;
+        color: #000;
+    }
+
+    .main-content {
+        max-width: none;
+        padding: 0;
+    }
+
+    .empire-container {
+        max-width: none;
+    }
+
+    .table-wrap {
+        overflow: visible;
+    }
+
+    .empire-table {
+        font-size: 8pt;
+        width: 100%;
+        table-layout: fixed;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .empire-table th,
+    .empire-table td {
+        padding: 0.15rem 0.2rem;
+        border-bottom: 1px solid #999;
+        color: #000;
+        white-space: normal;
+        overflow-wrap: break-word;
+    }
+
+    .empire-table thead {
+        display: table-header-group;
+    }
+
+    .empire-table tbody tr:nth-child(even) {
+        background: #eee;
+    }
+
+    .empire-table-header h2 {
+        display: none;
+    }
+
+    .page-break-after {
+        break-after: page;
+        page-break-after: always;
+    }
+}

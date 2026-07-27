@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ heading }} — Empire — NotQuiteHuman</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/common.css">
+    <link rel="stylesheet" href="/assets/css/empire.css">
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body>
+{% import 'empire/_macros.html.twig' as currency %}
+<main class="main-content">
+    <div class="empire-container">
+        <div class="empire-table-header no-print">
+            <h2>{{ heading }}</h2>
+            <button type="button" class="btn btn-primary" onclick="window.print()">
+                <i data-feather="printer"></i> Print
+            </button>
+        </div>
+        <div class="table-wrap">
+            <table class="empire-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        {% for qty in 10..50 %}<th class="num">{{ qty }}</th>{% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for price in 14..35 %}
+                    <tr{% if price == 25 %} class="page-break-after"{% endif %}>
+                        <td>{{ currency.money(price) }}</td>
+                        {% for qty in 10..50 %}
+                        <td class="num">
+                            {%- if mode == 'rounded' -%}
+                                {{ currency.roundedMoney(price * qty) }}
+                            {%- else -%}
+                                {{ currency.money(price * qty) }}
+                            {%- endif -%}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+<script>
+    feather.replace();
+</script>
+</body>
+</html>
