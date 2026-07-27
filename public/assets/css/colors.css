@@ -2,8 +2,8 @@
 
 :root {
     /* Site palette */
-    --bg-start: #0f0f1a;
-    --bg-end:   #1a1a2e;
+    --bg-start: #0f1410;
+    --bg-end:   #1a2420;
     --accent:   #4ade80;
     --accent-2: #16a34a;
     --glass-bg: rgba(255, 255, 255, 0.04);
@@ -25,11 +25,11 @@
     --accent-lighter: #bbf7d0;
 
     /* Potion-quiz palette (quiz.html, identify.html) */
-    --quiz-bg:     #14141f;
-    --quiz-card:   #1e1e2e;
-    --quiz-border: #33334a;
+    --quiz-bg:     #161d19;
+    --quiz-card:   #222a25;
+    --quiz-border: #38453d;
     --quiz-text:   #e8e8f0;
-    --quiz-muted:  #9090a8;
+    --quiz-muted:  #95a39a;
 
     --quiz-accent:      #2dd4bf;
     --quiz-accent-tint-12: rgba(45, 212, 191, 0.12);
