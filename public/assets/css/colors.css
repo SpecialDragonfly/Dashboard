@@ -13,17 +13,17 @@
     --text-muted: #8888aa;
     --danger:   #e05c6a;
 
-    /* Accent tints (explicit alpha steps of --accent, rgb 74, 222, 128) */
-    --accent-tint-08: rgba(74, 222, 128, 0.08);
-    --accent-tint-12: rgba(74, 222, 128, 0.12);
-    --accent-tint-15: rgba(74, 222, 128, 0.15);
-    --accent-tint-20: rgba(74, 222, 128, 0.20);
-    --accent-tint-30: rgba(74, 222, 128, 0.30);
-    --accent-tint-60: rgba(74, 222, 128, 0.60);
+    /* Accent tints (explicit alpha steps of --accent, rgb 112, 118, 39) */
+    --accent-tint-08: rgba(112, 118, 39, 0.08);
+    --accent-tint-12: rgba(112, 118, 39, 0.12);
+    --accent-tint-15: rgba(112, 118, 39, 0.15);
+    --accent-tint-20: rgba(112, 118, 39, 0.20);
+    --accent-tint-30: rgba(112, 118, 39, 0.30);
+    --accent-tint-60: rgba(112, 118, 39, 0.60);
 
     /* Lighter accent companions, for text sitting on dark backgrounds */
-    --accent-light:   #86efac;
-    --accent-lighter: #bbf7d0;
+    --accent-light:   #aab33b;
+    --accent-lighter: #c6cd69;
 
     /* Danger tints (explicit alpha steps of --danger, rgb 224, 92, 106) */
     --danger-tint-10: rgba(224, 92, 106, 0.10);
