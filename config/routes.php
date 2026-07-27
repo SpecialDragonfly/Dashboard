@@ -6,6 +6,7 @@ use App\Controller\ChartsController;
 use App\Controller\DashboardController;
 use App\Controller\DividendController;
 use App\Controller\EmpireController;
+use App\Controller\PaletteController;
 use App\Controller\RipperController;
 use App\Middleware\OptionalAuthMiddleware;
 use App\Middleware\TokenAuthMiddleware;
@@ -59,4 +60,7 @@ return function (App $app) {
     $app->get('/history',                     [RipperController::class, 'history'])->add(TokenAuthMiddleware::class);
     $app->get('/ripper/download/{videoId}',   [RipperController::class, 'download'])->add(TokenAuthMiddleware::class);
     $app->get('/ripper/stream/{videoId}',     [RipperController::class, 'stream'])->add(TokenAuthMiddleware::class);
+
+    // -- Colour palette preview (auth required) --
+    $app->get('/palette-preview', [PaletteController::class, 'index'])->add(TokenAuthMiddleware::class);
 };

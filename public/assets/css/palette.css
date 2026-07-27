@@ -1,0 +1,123 @@
+.palette-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.palette-header h1 {
+    margin-bottom: 0.75rem;
+    font-size: 1.75rem;
+    font-weight: 600;
+}
+
+.palette-intro {
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.palette-intro code {
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.875em;
+}
+
+.palette-upload {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+}
+
+#palette-source-img {
+    max-width: 160px;
+    max-height: 100px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.palette-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.palette-swatch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    width: 110px;
+}
+
+.palette-swatch-colour {
+    width: 100%;
+    height: 60px;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+}
+
+.palette-swatch-name {
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.palette-swatch-value {
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.7rem;
+    color: var(--text);
+}
+
+.palette-samples {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+}
+
+.palette-sample-card {
+    padding: 0.75rem 1rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+.palette-sample-link {
+    color: var(--accent);
+    font-weight: 500;
+}
+
+.palette-output-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.palette-output-header h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+#palette-output-text {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.85rem;
+    resize: vertical;
+}

@@ -6,6 +6,7 @@ use App\Controller\ChartsController;
 use App\Controller\DashboardController;
 use App\Controller\DividendController;
 use App\Controller\EmpireController;
+use App\Controller\PaletteController;
 use App\Controller\RipperController;
 use App\Middleware\OptionalAuthMiddleware;
 use App\Middleware\TokenAuthMiddleware;
@@ -155,6 +156,9 @@ return [
         containerGet($c, DividendService::class),
     ),
     EmpireController::class => fn(ContainerInterface $c) => new EmpireController(
+        containerGet($c, Environment::class),
+    ),
+    PaletteController::class => fn(ContainerInterface $c) => new PaletteController(
         containerGet($c, Environment::class),
     ),
 ];

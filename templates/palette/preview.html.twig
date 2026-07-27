@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Colour Palette Preview — NotQuiteHuman{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="/assets/css/palette.css">
+{% endblock %}
+
+{% block body %}
+<div class="palette-container">
+    <div class="palette-header">
+        <h1>Colour Palette Preview</h1>
+        <p class="palette-intro">
+            Upload an image to derive a candidate site palette from it. Nothing is
+            uploaded anywhere — the image is only read in your browser. The page's
+            own header and background above update live so you can judge the
+            palette in context; copy the values below into
+            <code>colors.css</code> once you're happy.
+        </p>
+    </div>
+
+    <div class="palette-upload">
+        <input type="file" id="palette-file" accept="image/*">
+        <img id="palette-source-img" alt="" style="display:none">
+    </div>
+
+    <canvas id="palette-canvas" style="display:none"></canvas>
+
+    <div id="palette-swatches" class="palette-swatches" style="display:none"></div>
+
+    <div id="palette-samples" class="palette-samples" style="display:none">
+        <button class="btn btn-primary">Sample button</button>
+        <div class="palette-sample-card">
+            <span>Sample card using <code>--glass-bg</code>/<code>--glass-border</code></span>
+        </div>
+        <a href="#" class="palette-sample-link">Sample accent-coloured link</a>
+    </div>
+
+    <div id="palette-output" class="palette-output" style="display:none">
+        <div class="palette-output-header">
+            <h2>CSS custom properties</h2>
+            <button id="palette-copy-btn" class="btn btn-sm">Copy</button>
+        </div>
+        <textarea id="palette-output-text" readonly rows="7"></textarea>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="/assets/js/palette.js"></script>
+{% endblock %}
